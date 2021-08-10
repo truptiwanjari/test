@@ -1,0 +1,4252 @@
+--Basic Syntax---
+PHP tags ¶
+When PHP parses a file, it looks for opening and closing tags, which are <?php and ?> which tell PHP to start and stop interpreting the code between them. Parsing in this manner allows PHP to be embedded in all sorts of different documents, as everything outside of a pair of opening and closing tags is ignored by the PHP parser.
+
+PHP includes a short echo tag <?= which is a short-hand to the more verbose <?php echo.
+
+Example #1 PHP Opening and Closing Tags
+
+1.  <?php echo 'if you want to serve PHP code in XHTML or XML documents,
+                use these tags'; ?>
+
+2.  You can use the short echo tag to <?= 'print this string' ?>.
+    It's equivalent to <?php echo 'print this string' ?>.
+
+3.  <? echo 'this code is within short tags, but will only work '.
+            'if short_open_tag is enabled'; ?>
+
+Short tags (example three) are available by default but can be disabled either via the short_open_tag php.ini configuration file directive, or are disabled by default if PHP is built with the --disable-short-tags configuration.
+
+Note:
+
+As short tags can be disabled it is recommened to only use the normal tags (<?php ?> and <?= ?>) to maximise compatibility.
+
+
+If a file contains only PHP code, it is preferable to omit the PHP closing tag at the end of the file. This prevents accidental whitespace or new lines being added after the PHP closing tag, which may cause unwanted effects because PHP will start output buffering when there is no intention from the programmer to send any output at that point in the script.
+
+<?php
+echo "Hello world";
+
+// ... more code
+
+echo "Last statement";
+
+// the script ends here with no PHP closing tag
+?>
+
+
+
+
+
+---Escaping from HTML---
+Everything outside of a pair of opening and closing tags is ignored by the PHP parser which allows PHP files to have mixed content. This allows PHP to be embedded in HTML documents, for example to create templates.
+
+<p>This is going to be ignored by PHP and displayed by the browser.</p>
+<?php echo 'While this is going to be parsed.'; ?>
+<p>This will also be ignored by PHP and displayed by the browser.</p>
+This works as expected, because when the PHP interpreter hits the ?> closing tags, it simply starts outputting whatever it finds (except for the immediately following newline - see instruction separation) until it hits another opening tag unless in the middle of a conditional statement in which case the interpreter will determine the outcome of the conditional before making a decision of what to skip over. See the next example.
+Using structures with conditions
+
+Example #1 Advanced escaping using conditions
+
+<?php if ($expression == true): ?>
+  This will show if the expression is true.
+<?php else: ?>
+  Otherwise this will show.
+<?php endif; ?>
+
+
+In this example PHP will skip the blocks where the condition is not met, even though they are outside of the PHP open/close tags; PHP skips them according to the condition since the PHP interpreter will jump over blocks contained within a condition that is not met.
+For outputting large blocks of text, dropping out of PHP parsing mode is generally more efficient than sending all of the text through echo or print.
+
+Note:
+
+If PHP is embeded within XML or XHTML the normal PHP <?php ?> must be used to remain compliant with the standards.
+
+
+<html><body>
+<p<?php if ($highlight): ?> class="highlight"<?php endif;?>>This is a paragraph.</p>
+</body></html>
+
+
+-----Instruction separation------
+As in C or Perl, PHP requires instructions to be terminated with a semicolon at the end of each statement. The closing tag of a block of PHP code automatically implies a semicolon; you do not need to have a semicolon terminating the last line of a PHP block. The closing tag for the block will include the immediately trailing newline if one is present.
+
+Example #1 Example showing the closing tag encompasing the trailing newline
+
+<?php echo "Some text"; ?>
+No newline
+<?= "But newline now" ?>
+
+
+-----Comments----
+PHP supports 'C', 'C++' and Unix shell-style (Perl style) comments. For example:
+
+<?php
+    echo 'This is a test'; // This is a one-line c++ style comment
+    /* This is a multi line comment
+       yet another line of comment */
+    echo 'This is yet another test';
+    echo 'One Final Test'; # This is a one-line shell-style comment
+?>
+
+The "one-line" comment styles only comment to the end of the line or the current block of PHP code, whichever comes first. This means that HTML code after // ... ?> or # ... ?> WILL be printed: ?> breaks out of PHP mode and returns to HTML mode, and // or # cannot influence that.
+
+<h1>This is an <?php # echo 'simple';?> example</h1>
+<p>The header above will say 'This is an  example'.</p>
+'C' style comments end at the first */ encountered. Make sure you don't nest 'C' style comments. It is easy to make this mistake if you are trying to comment out a large block of code.
+
+<?php
+ /*
+    echo 'This is a test'; /* This comment will cause a problem */
+ */
+?>
+
+===Type===
+
+---Introduction--
+PHP supports ten primitive types.
+
+--Four scalar types:--
+
+bool
+int
+float (floating-point number, aka double)
+string
+
+
+--Four compound types:--
+array
+object
+callable
+iterable
+
+--And finally two special types:--
+resource
+NULL
+
+Some references to the type "double" may remain in the manual. Consider double the same as float; the two names exist only for historic reasons.
+
+The type of a variable is not usually set by the programmer; rather, it is decided at runtime by PHP depending on the context in which that variable is used.
+
+
+
+Note: To check the type and value of an expression, use the var_dump() function.
+
+To get a human-readable representation of a type for debugging, use the gettype() function. To check for a certain type, do not use gettype(), but rather the is_type functions. Some examples:
+
+<?php
+$a_bool = TRUE;   // a boolean
+$a_str  = "foo";  // a string
+$a_str2 = 'foo';  // a string
+$an_int = 12;     // an integer
+
+echo gettype($a_bool); // prints out:  boolean
+echo "<br>";
+echo gettype($a_str);  // prints out:  string
+
+// If this is an integer, increment it by four
+if (is_int($an_int)) {
+    $an_int += 4;
+}
+
+// If $a_bool is a string, print it out
+// (does not print out anything)
+if (is_string($a_bool)) {
+    echo "String: $a_bool";
+}
+?>
+
+Note: 
+To forcibly convert a variable to a certain type, either cast the variable or use the settype() function on it.
+
+
+
+---Booleans---
+This is the simplest type. A bool expresses a truth value. It can be either TRUE or FALSE.
+
+Syntax:
+To specify a bool literal, use the constants TRUE or FALSE. Both are case-insensitive.
+
+<?php
+$foo = True; // assign the value TRUE to $foo
+?>
+
+Typically, the result of an operator which returns a bool value is passed on to a control structure.
+
+<?php
+// == is an operator which tests
+// equality and returns a boolean
+if ($action == "show_version") {
+    echo "The version is 1.23";
+}
+
+// this is not necessary...
+if ($show_separators == TRUE) {
+    echo "<hr>\n";
+}
+
+// ...because this can be used with exactly the same meaning:
+if ($show_separators) {
+    echo "<hr>\n";
+}
+?>
+
+---Converting to boolean---
+To explicitly convert a value to bool, use the (bool) or (boolean) casts. However, in most cases the cast is unnecessary, since a value will be automatically converted if an operator, function or control structure requires a bool argument.
+
+See also Type Juggling.
+
+When converting to bool, the following values are considered FALSE:
+
+the boolean FALSE itself
+the integers 0 and -0 (zero)
+the floats 0.0 and -0.0 (zero)
+the empty string, and the string "0"
+an array with zero elements
+the special type NULL (including unset variables)
+SimpleXML objects created from empty tags
+Every other value is considered TRUE (including any resource and NAN).
+
+Warning
+-1 is considered TRUE, like any other non-zero (whether negative or positive) number!
+
+<?php
+echo "<pre>";
+var_dump((bool) "");        // bool(false)
+var_dump((bool) 1);         // bool(true)
+var_dump((bool) -2);        // bool(true)
+var_dump((bool) "foo");     // bool(true)
+var_dump((bool) 2.3e5);     // bool(true)
+var_dump((bool) array(12)); // bool(true)
+var_dump((bool) array());   // bool(false)
+var_dump((bool) "false");   // bool(true)
+?>
+
+----Integers----
+An int is a number of the set ℤ = {..., -2, -1, 0, 1, 2, ...}.
+
+--Syntax--
+ints can be specified in decimal (base 10), hexadecimal (base 16), octal (base 8) or binary (base 2) notation. The negation operator can be used to denote a negative int.
+
+To use octal notation, precede the number with a 0 (zero). To use hexadecimal notation precede the number with 0x. To use binary notation precede the number with 0b.
+
+As of PHP 7.4.0, integer literals may contain underscores (_) between digits, for better readability of literals. These underscores are removed by PHP's scanner.
+
+Example #1 Integer literals
+
+<?php
+$a = 1234; // decimal number
+$a = 0123; // octal number (equivalent to 83 decimal)
+$a = 0x1A; // hexadecimal number (equivalent to 26 decimal)
+$a = 0b11111111; // binary number (equivalent to 255 decimal)
+$a = 1_234_567; // decimal number (as of PHP 7.4.0)
+?>
+
+
+Formally, the structure for int literals is as of PHP 7.4.0 (previously, underscores have not been allowed):
+
+decimal     : [1-9][0-9]*(_[0-9]+)*
+            | 0
+
+hexadecimal : 0[xX][0-9a-fA-F]+(_[0-9a-fA-F]+)*
+
+octal       : 0[0-7]+(_[0-7]+)*
+
+binary      : 0[bB][01]+(_[01]+)*
+
+integer     : decimal
+            | hexadecimal
+            | octal
+            | binary
+
+
+The size of an int is platform-dependent, although a maximum value of about two billion is the usual value (that's 32 bits signed). 64-bit platforms usually have a maximum value of about 9E18. PHP does not support unsigned ints. int size can be determined using the constant PHP_INT_SIZE, maximum value using the constant PHP_INT_MAX, and minimum value using the constant PHP_INT_MIN.
+
+--Integer overflow--
+If PHP encounters a number beyond the bounds of the int type, it will be interpreted as a float instead. Also, an operation which results in a number beyond the bounds of the int type will return a float instead.
+
+Example #2 Integer overflow on a 32-bit system
+
+<?php
+
+$large_number = 2147483647;
+var_dump($large_number);                     // int(2147483647)
+
+$large_number = 2147483648;
+var_dump($large_number);                     // float(2147483648)
+
+$million = 1000000;
+$large_number =  50000 * $million;
+var_dump($large_number);                     // float(50000000000)
+?>
+Example #3 Integer overflow on a 64-bit system
+
+<?php
+$large_number = 9223372036854775807;
+var_dump($large_number);                     // int(9223372036854775807)
+
+$large_number = 9223372036854775808;
+var_dump($large_number);                     // float(9.2233720368548E+18)
+
+$million = 1000000;
+$large_number =  50000000000000 * $million;
+var_dump($large_number);                     // float(5.0E+19)
+?>
+
+There is no int division operator in PHP, to achieve this use the intdiv() function. 1/2 yields the float 0.5. The value can be cast to an int to round it towards zero, or the round() function provides finer control over rounding.
+
+<?php
+var_dump(25/7);         // float(3.5714285714286)
+var_dump((int) (25/7)); // int(3)
+var_dump(round(25/7));  // float(4)
+?>
+Converting to integer ¶
+To explicitly convert a value to int, use either the (int) or (integer) casts. However, in most cases the cast is not needed, since a value will be automatically converted if an operator, function or control structure requires an int argument. A value can also be converted to int with the intval() function.
+
+If a resource is converted to an int, then the result will be the unique resource number assigned to the resource by PHP at runtime.
+
+See also Type Juggling.
+
+--From booleans--
+FALSE will yield 0 (zero), and TRUE will yield 1 (one).
+
+From floating point numbers ¶
+When converting from float to int, the number will be rounded towards zero.
+
+If the float is beyond the boundaries of int (usually +/- 2.15e+9 = 2^31 on 32-bit platforms and +/- 9.22e+18 = 2^63 on 64-bit platforms), the result is undefined, since the float doesn't have enough precision to give an exact int result. No warning, not even a notice will be issued when this happens!
+
+Note:
+
+NaN and Infinity will always be zero when cast to int.
+
+Warning
+Never cast an unknown fraction to int, as this can sometimes lead to unexpected results.
+
+<?php
+echo (int) ( (0.1+0.7) * 10 ); // echoes 7!
+?>
+See also the warning about float precision.
+
+---From strings---
+If the string is numeric or leading numeric then it will resolve to the corresponding integer value, otherwise it is converted to zero (0).
+
+---From NULL---
+NULL is always converted to zero (0).
+
+--From other types--
+Caution
+The behaviour of converting to int is undefined for other types. Do not rely on any observed behaviour, as it can change without notice.
+
+A leading zero in a numeric literal means "this is octal". But don't be confused: a leading zero in a string does not. Thus:
+$x = 0123;          // 83
+$y = "0123" + 0     // 123
+
+
+===Floating point numbers===
+Floating point numbers (also known as "floats", "doubles", or "real numbers") can be specified using any of the following syntaxes:
+
+<?php
+$a = 1.234; 
+$b = 1.2e3; 
+$c = 7E-10;
+$d = 1_234.567; // as of PHP 7.4.0
+?>
+
+--Converting to float--
+--From strings--
+If the string is numeric or leading numeric then it will resolve to the corresponding float value, otherwise it is converted to zero (0).
+
+--From other types--
+For values of other types, the conversion is performed by converting the value to int first and then to float. See Converting to integer for more information.
+
+Note:
+
+As certain types have undefined behavior when converting to int, this is also the case when converting to float.
+
+---Comparing floats---
+As noted in the warning above, testing floating point values for equality is problematic, due to the way that they are represented internally. However, there are ways to make comparisons of floating point values that work around these limitations.
+
+To test floating point values for equality, an upper bound on the relative error due to rounding is used. This value is known as the machine epsilon, or unit roundoff, and is the smallest acceptable difference in calculations.
+
+$a and $b are equal to 5 digits of precision.
+
+<?php
+$a = 1.23456789;
+$b = 1.23456780;
+$epsilon = 0.00001;
+
+if(abs($a-$b) < $epsilon) {
+    echo "true";
+}
+?>
+
+--NaN--
+Some numeric operations can result in a value represented by the constant NAN. This result represents an undefined or unrepresentable value in floating-point calculations. Any loose or strict comparisons of this value against any other value, including itself, but except TRUE, will have a result of FALSE.
+
+Because NAN represents any number of different values, NAN should not be compared to other values, including itself, and instead should be checked for using is_nan().
+
+
+
+===Strings===
+A string is series of characters, where a character is the same as a byte. This means that PHP only supports a 256-character set, and hence does not offer native Unicode support. See details of the string type.
+
+Note: On 32-bit builds, a string can be as large as up to 2GB (2147483647 bytes maximum)
+
+Syntax ¶
+A string literal can be specified in four different ways:
+
+single quoted
+double quoted
+heredoc syntax
+nowdoc syntax
+
+
+---Single quoted--
+The simplest way to specify a string is to enclose it in single quotes (the character ').
+
+To specify a literal single quote, escape it with a backslash (\). To specify a literal backslash, double it (\\). All other instances of backslash will be treated as a literal backslash: this means that the other escape sequences you might be used to, such as \r or \n, will be output literally as specified rather than having any special meaning.
+
+Note: Unlike the double-quoted and heredoc syntaxes, variables and escape sequences for special characters will not be expanded when they occur in single quoted strings.
+
+<?php
+echo 'this is a simple string';
+
+echo 'You can also have embedded newlines in
+strings this way as it is
+okay to do';
+
+// Outputs: Arnold once said: "I'll be back"
+echo 'Arnold once said: "I\'ll be back"';
+
+// Outputs: You deleted C:\*.*?
+echo 'You deleted C:\\*.*?';
+
+// Outputs: You deleted C:\*.*?
+echo 'You deleted C:\*.*?';
+
+// Outputs: This will not expand: \n a newline
+echo 'This will not expand: \n a newline';
+
+// Outputs: Variables do not $expand $either
+echo 'Variables do not $expand $either';
+?>
+
+
+====Double quoted =====
+If the string is enclosed in double-quotes ("), PHP will interpret the following escape sequences for special characters:
+
+Escaped characters
+Sequence    Meaning
+\n  linefeed (LF or 0x0A (10) in ASCII)
+\r  carriage return (CR or 0x0D (13) in ASCII)
+\t  horizontal tab (HT or 0x09 (9) in ASCII)
+\v  vertical tab (VT or 0x0B (11) in ASCII)
+\e  escape (ESC or 0x1B (27) in ASCII)
+\f  form feed (FF or 0x0C (12) in ASCII)
+\\  backslash
+\$  dollar sign
+\"  double-quote
+\[0-7]{1,3} the sequence of characters matching the regular expression is a character in octal notation, which silently overflows to fit in a byte (e.g. "\400" === "\000")
+\x[0-9A-Fa-f]{1,2}  the sequence of characters matching the regular expression is a character in hexadecimal notation
+\u{[0-9A-Fa-f]+}    the sequence of characters matching the regular expression is a Unicode codepoint, which will be output to the string as that codepoint's UTF-8 representation
+As in single quoted strings, escaping any other character will result in the backslash being printed too.
+
+The most important feature of double-quoted strings is the fact that variable names will be expanded. See string parsing for details.
+
+
+
+
+---Numeric strings---
+A PHP string is considered numeric if it can be interpreted as an int or a float.
+
+---Strings used in numeric contexts--
+When a string needs to be evaluated as number (e.g. arithmetic operations, int type declaration, etc.) the following steps are taken to determine the outcome:
+
+If the string is numeric, resolve to an int if the string is an integer numeric string and fits into the limits of the int type limits (as defined by PHP_INT_MAX), otherwise resolve to a float.
+If the context allows leading numeric strings and the string is one, resolve to an int if the leading part of the string is an integer numeric string and fits into the limits of the int type limits (as defined by PHP_INT_MAX), otherwise resolve to a float. Additionally an error of level E_WARNING is raised.
+The string is not numeric, throw a TypeError.
+
+
+
+---Arrays---
+An array in PHP is actually an ordered map. A map is a type that associates values to keys. This type is optimized for several different uses; it can be treated as an array, list (vector), hash table (an implementation of a map), dictionary, collection, stack, queue, and probably more. As array values can be other arrays, trees and multidimensional arrays are also possible.
+
+Explanation of those data structures is beyond the scope of this manual, but at least one example is provided for each of them. For more information, look towards the considerable literature that exists about this broad topic.
+
+
+---Syntax---
+Specifying with array() ¶
+An array can be created using the array() language construct. It takes any number of comma-separated key => value pairs as arguments.
+
+array(
+    key  => value,
+    key2 => value2,
+    key3 => value3,
+    ...
+)
+The comma after the last array element is optional and can be omitted. This is usually done for single-line arrays, i.e. array(1, 2) is preferred over array(1, 2, ). For multi-line arrays on the other hand the trailing comma is commonly used, as it allows easier addition of new elements at the end.
+
+Note:
+
+A short array syntax exists which replaces array() with [].
+Example #1 A simple array
+
+<?php
+$array = array(
+    "foo" => "bar",
+    "bar" => "foo",
+);
+
+// Using the short array syntax
+$array = [
+    "foo" => "bar",
+    "bar" => "foo",
+];
+?>
+
+The key can either be an int or a string. The value can be of any type.
+
+Additionally the following key casts will occur:
+
+Strings containing valid decimal ints, unless the number is preceded by a + sign, will be cast to the int type. E.g. the key "8" will actually be stored under 8. On the other hand "08" will not be cast, as it isn't a valid decimal integer.
+Floats are also cast to ints, which means that the fractional part will be truncated. E.g. the key 8.7 will actually be stored under 8.
+Bools are cast to ints, too, i.e. the key true will actually be stored under 1 and the key false under 0.
+Null will be cast to the empty string, i.e. the key null will actually be stored under "".
+Arrays and objects can not be used as keys. Doing so will result in a warning: Illegal offset type.
+
+If multiple elements in the array declaration use the same key, only the last one will be used as all others are overwritten.
+
+Example #2 Type Casting and Overwriting example
+
+<?php
+$array = array(
+    1    => "a",
+    "1"  => "b",
+    1.5  => "c",
+    true => "d",
+);
+var_dump($array);
+?>
+
+Note: Important
+The above example will output:
+
+array(1) {
+  [1]=>
+  string(1) "d"
+}
+
+As all the keys in the above example are cast to 1, the value will be overwritten on every new element and the last assigned value "d" is the only one left over.
+
+PHP arrays can contain int and string keys at the same time as PHP does not distinguish between indexed and associative arrays.
+
+Example #3 Mixed int and string keys
+
+<?php
+$array = array(
+    "foo" => "bar",
+    "bar" => "foo",
+    100   => -100,
+    -100  => 100,
+);
+var_dump($array);
+?>
+The above example will output:
+
+array(4) {
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(3) "foo"
+  [100]=>
+  int(-100)
+  [-100]=>
+  int(100)
+}
+
+
+Example #4 Indexed arrays without key
+
+<?php
+$array = array("foo", "bar", "hello", "world");
+var_dump($array);
+?>
+
+
+Example #5 Keys not on all elements
+
+<?php
+$array = array(
+         "a",
+         "b",
+    6 => "c",
+         "d",
+);
+var_dump($array);
+?>
+The above example will output:
+
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [6]=>
+  string(1) "c"
+  [7]=>
+  string(1) "d"
+}
+
+
+Accessing array elements with square bracket syntax ¶
+Array elements can be accessed using the array[key] syntax.
+
+Example #6 Accessing array elements
+
+<?php
+$array = array(
+    "foo" => "bar",
+    42    => 24,
+    "multi" => array(
+         "dimensional" => array(
+             "array" => "foo"
+         )
+    )
+);
+
+var_dump($array["foo"]);
+var_dump($array[42]);
+var_dump($array["multi"]["dimensional"]["array"]);
+?>
+Note:
+
+Both square brackets and curly braces can be used interchangeably for accessing array elements (e.g. $array[42] and $array{42} will both do the same thing in the example above).
+
+Example #7 Array dereferencing
+
+<?php
+function getArray() {
+    return array(1, 2, 3);
+}
+
+$secondElement = getArray()[1];
+
+// or
+list(, $secondElement) = getArray();
+?>
+
+
+Note:
+
+Attempting to access an array key which has not been defined is the same as accessing any other undefined variable: an E_NOTICE-level error message will be issued, and the result will be NULL.
+
+<?php
+$arr = array(5 => 1, 12 => 2);
+
+$arr[] = 56;    // This is the same as $arr[13] = 56;
+                // at this point of the script
+
+$arr["x"] = 42; // This adds a new element to
+                // the array with key "x"
+                
+unset($arr[5]); // This removes the element from the array
+
+unset($arr);    // This deletes the whole array
+?>
+Note:
+
+As mentioned above, if no key is specified, the maximum of the existing int indices is taken, and the new key will be that maximum value plus 1 (but at least 0). If no int indices exist yet, the key will be 0 (zero).
+
+Note that the maximum integer key used for this need not currently exist in the array. It need only have existed in the array at some time since the last time the array was re-indexed. The following example illustrates:
+
+<?php
+// Create a simple array.
+$array = array(1, 2, 3, 4, 5);
+print_r($array);
+
+// Now delete every item, but leave the array itself intact:
+foreach ($array as $i => $value) {
+    unset($array[$i]);
+}
+print_r($array);
+
+// Append an item (note that the new key is 5, instead of 0).
+$array[] = 6;
+print_r($array);
+
+// Re-index:
+$array = array_values($array);
+$array[] = 7;
+print_r($array);
+?>
+
+---Array Function----
+array_change_key_case — Changes the case of all keys in an array
+array_chunk — Split an array into chunks
+array_column — Return the values from a single column in the input array
+array_combine — Creates an array by using one array for keys and another for its values
+array_count_values — Counts all the values of an array
+array_diff_assoc — Computes the difference of arrays with additional index check
+array_diff_key — Computes the difference of arrays using keys for comparison
+array_diff_uassoc — Computes the difference of arrays with additional index check which is performed by a user supplied callback function
+array_diff_ukey — Computes the difference of arrays using a callback function on the keys for comparison
+array_diff — Computes the difference of arrays
+array_fill_keys — Fill an array with values, specifying keys
+array_fill — Fill an array with values
+array_filter — Filters elements of an array using a callback function
+array_flip — Exchanges all keys with their associated values in an array
+array_intersect_assoc — Computes the intersection of arrays with additional index check
+array_intersect_key — Computes the intersection of arrays using keys for comparison
+array_intersect_uassoc — Computes the intersection of arrays with additional index check, compares indexes by a callback function
+array_intersect_ukey — Computes the intersection of arrays using a callback function on the keys for comparison
+array_intersect — Computes the intersection of arrays
+array_key_exists — Checks if the given key or index exists in the array
+array_key_first — Gets the first key of an array
+array_key_last — Gets the last key of an array
+array_keys — Return all the keys or a subset of the keys of an array
+array_map — Applies the callback to the elements of the given arrays
+array_merge_recursive — Merge one or more arrays recursively
+array_merge — Merge one or more arrays
+array_multisort — Sort multiple or multi-dimensional arrays
+array_pad — Pad array to the specified length with a value
+array_pop — Pop the element off the end of array
+array_product — Calculate the product of values in an array
+array_push — Push one or more elements onto the end of array
+array_rand — Pick one or more random keys out of an array
+array_reduce — Iteratively reduce the array to a single value using a callback function
+array_replace_recursive — Replaces elements from passed arrays into the first array recursively
+array_replace — Replaces elements from passed arrays into the first array
+array_reverse — Return an array with elements in reverse order
+array_search — Searches the array for a given value and returns the first corresponding key if successful
+array_shift — Shift an element off the beginning of array
+array_slice — Extract a slice of the array
+array_splice — Remove a portion of the array and replace it with something else
+array_sum — Calculate the sum of values in an array
+array_udiff_assoc — Computes the difference of arrays with additional index check, compares data by a callback function
+array_udiff_uassoc — Computes the difference of arrays with additional index check, compares data and indexes by a callback function
+array_udiff — Computes the difference of arrays by using a callback function for data comparison
+array_uintersect_assoc — Computes the intersection of arrays with additional index check, compares data by a callback function
+array_uintersect_uassoc — Computes the intersection of arrays with additional index check, compares data and indexes by separate callback functions
+array_uintersect — Computes the intersection of arrays, compares data by a callback function
+array_unique — Removes duplicate values from an array
+array_unshift — Prepend one or more elements to the beginning of an array
+array_values — Return all the values of an array
+array_walk_recursive — Apply a user function recursively to every member of an array
+array_walk — Apply a user supplied function to every member of an array
+array — Create an array
+arsort — Sort an array in reverse order and maintain index association
+asort — Sort an array and maintain index association
+compact — Create array containing variables and their values
+count — Count all elements in an array, or something in an object
+current — Return the current element in an array
+each — Return the current key and value pair from an array and advance the array cursor
+end — Set the internal pointer of an array to its last element
+extract — Import variables into the current symbol table from an array
+in_array — Checks if a value exists in an array
+key_exists — Alias of array_key_exists
+key — Fetch a key from an array
+krsort — Sort an array by key in reverse order
+ksort — Sort an array by key
+list — Assign variables as if they were an array
+natcasesort — Sort an array using a case insensitive "natural order" algorithm
+natsort — Sort an array using a "natural order" algorithm
+next — Advance the internal pointer of an array
+pos — Alias of current
+prev — Rewind the internal array pointer
+range — Create an array containing a range of elements
+reset — Set the internal pointer of an array to its first element
+rsort — Sort an array in reverse order
+shuffle — Shuffle an array
+sizeof — Alias of count
+sort — Sort an array
+uasort — Sort an array with a user-defined comparison function and maintain index association
+uksort — Sort an array by keys using a user-defined comparison function
+usort — Sort an array by values using a user-defined comparison function
+
+----Array do's and don'ts----
+Why is $foo[bar] wrong?
+
+Always use quotes around a string literal array index. For example, $foo['bar'] is correct, while $foo[bar] is not. But why? It is common to encounter this kind of syntax in old scripts:
+
+<?php
+$foo[bar] = 'enemy';
+echo $foo[bar];
+// etc
+?>
+
+Note:
+This is wrong, but it works. The reason is that this code has an undefined constant (bar) rather than a string ('bar' - notice the quotes). It works because PHP automatically converts a bare string (an unquoted string which does not correspond to any known symbol) into a string which contains the bare string. For instance, if there is no defined constant named bar, then PHP will substitute in the string 'bar' and use that.
+
+
+Warning
+The fallback to treat an undefined constant as bare string is deprecated as of PHP 7.2.0, and issues an error of level E_WARNING. Formerly, an error of level E_NOTICE has been issued.
+
+Note: This does not mean to always quote the key. Do not quote keys which are constants or variables, as this will prevent PHP from interpreting them.
+
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', true);
+ini_set('html_errors', false);
+// Simple array:
+$array = array(1, 2);
+$count = count($array);
+for ($i = 0; $i < $count; $i++) {
+    echo "\nChecking $i: \n";
+    echo "Bad: " . $array['$i'] . "\n";
+    echo "Good: " . $array[$i] . "\n";
+    echo "Bad: {$array['$i']}\n";
+    echo "Good: {$array[$i]}\n";
+}
+?>
+
+<?php
+// Show all errors
+error_reporting(E_ALL);
+
+$arr = array('fruit' => 'apple', 'veggie' => 'carrot');
+
+// Correct
+print $arr['fruit'];  // apple
+print $arr['veggie']; // carrot
+
+// Incorrect.  This works but also throws a PHP error of level E_NOTICE because
+// of an undefined constant named fruit
+// 
+// Notice: Use of undefined constant fruit - assumed 'fruit' in...
+print $arr[fruit];    // apple
+
+// This defines a constant to demonstrate what's going on.  The value 'veggie'
+// is assigned to a constant named fruit.
+define('fruit', 'veggie');
+
+// Notice the difference now
+print $arr['fruit'];  // apple
+print $arr[fruit];    // carrot
+
+// The following is okay, as it's inside a string. Constants are not looked for
+// within strings, so no E_NOTICE occurs here
+print "Hello $arr[fruit]";      // Hello apple
+
+// With one exception: braces surrounding arrays within strings allows constants
+// to be interpreted
+print "Hello {$arr[fruit]}";    // Hello carrot
+print "Hello {$arr['fruit']}";  // Hello apple
+
+// This will not work, and will result in a parse error, such as:
+// Parse error: parse error, expecting T_STRING' or T_VARIABLE' or T_NUM_STRING'
+// This of course applies to using superglobals in strings as well
+print "Hello $arr['fruit']";
+print "Hello $_GET['foo']";
+
+// Concatenation is another option
+print "Hello " . $arr['fruit']; // Hello apple
+?>
+
+
+---Converting to array---
+For any of the types int, float, string, bool and resource, converting a value to an array results in an array with a single element with index zero and the value of the scalar which was converted. In other words, (array)$scalarValue is exactly the same as array($scalarValue).
+
+If an object is converted to an array, the result is an array whose elements are the object's properties. The keys are the member variable names, with a few notable exceptions: integer properties are unaccessible; private variables have the class name prepended to the variable name; protected variables have a '*' prepended to the variable name. These prepended values have null bytes on either side. This can result in some unexpected behaviour:
+<?php
+
+class A {
+    private $A; // This will become '\0A\0A'
+}
+
+class B extends A {
+    private $A; // This will become '\0B\0A'
+    public $AA; // This will become 'AA'
+}
+
+var_dump((array) new B());
+?>
+
+
+Converting NULL to an array results in an empty array.
+
+---Comparing---
+It is possible to compare arrays with the array_diff() function and with array operators.
+
+
+Examples ¶
+The array type in PHP is very versatile. Here are some examples:
+
+<?php
+// This:
+$a = array( 'color' => 'red',
+            'taste' => 'sweet',
+            'shape' => 'round',
+            'name'  => 'apple',
+            4        // key will be 0
+          );
+
+$b = array('a', 'b', 'c');
+
+// . . .is completely equivalent with this:
+$a = array();
+$a['color'] = 'red';
+$a['taste'] = 'sweet';
+$a['shape'] = 'round';
+$a['name']  = 'apple';
+$a[]        = 4;        // key will be 0
+
+$b = array();
+$b[] = 'a';
+$b[] = 'b';
+$b[] = 'c';
+
+// After the above code is executed, $a will be the array
+// array('color' => 'red', 'taste' => 'sweet', 'shape' => 'round', 
+// 'name' => 'apple', 0 => 4), and $b will be the array 
+// array(0 => 'a', 1 => 'b', 2 => 'c'), or simply array('a', 'b', 'c').
+?>
+Example #8 Using array()
+
+<?php
+// Array as (property-)map
+$map = array( 'version'    => 4,
+              'OS'         => 'Linux',
+              'lang'       => 'english',
+              'short_tags' => true
+            );
+            
+// strictly numerical keys
+$array = array( 7,
+                8,
+                0,
+                156,
+                -10
+              );
+// this is the same as array(0 => 7, 1 => 8, ...)
+
+$switching = array(         10, // key = 0
+                    5    =>  6,
+                    3    =>  7, 
+                    'a'  =>  4,
+                            11, // key = 6 (maximum of integer-indices was 5)
+                    '8'  =>  2, // key = 8 (integer!)
+                    '02' => 77, // key = '02'
+                    0    => 12  // the value 10 will be overwritten by 12
+                  );
+                  
+// empty array
+$empty = array();         
+?>
+
+Example #9 Collection
+<?php
+$colors = array('red', 'blue', 'green', 'yellow');
+
+foreach ($colors as $color) {
+    echo "Do you like $color?\n";
+}
+
+?>
+
+Changing the values of the array directly is possible by passing them by reference.
+
+Example #10 Changing element in the loop
+
+<?php
+foreach ($colors as &$color) {
+    $color = strtoupper($color);
+}
+unset($color); /* ensure that following writes to
+$color will not modify the last array element */
+
+print_r($colors);
+?>
+
+
+This example creates a one-based array.
+Example #11 One-based index
+
+<?php
+$firstquarter  = array(1 => 'January', 'February', 'March');
+print_r($firstquarter);
+?>
+
+
+
+Example #12 Filling an array
+
+<?php
+// fill an array with all items from a directory
+$handle = opendir('.');
+while (false !== ($file = readdir($handle))) {
+    $files[] = $file;
+}
+
+print_r($files);
+closedir($handle); 
+?>
+
+
+Example #13 Sorting an array
+
+<?php
+sort($files);
+print_r($files);
+?>
+
+Because the value of an array can be anything, it can also be another array. This enables the creation of recursive and multi-dimensional arrays.
+
+Example #14 Recursive and multi-dimensional arrays
+
+<?php
+$fruits = array ( "fruits"  => array ( "a" => "orange",
+                                       "b" => "banana",
+                                       "c" => "apple"
+                                     ),
+                  "numbers" => array ( 1,
+                                       2,
+                                       3,
+                                       4,
+                                       5,
+                                       6
+                                     ),
+                  "holes"   => array (      "first",
+                                       5 => "second",
+                                            "third"
+                                     )
+                );
+
+// Some examples to address values in the array above 
+echo $fruits["holes"][5];    // prints "second"
+echo $fruits["fruits"]["a"]; // prints "orange"
+unset($fruits["holes"][0]);  // remove "first"
+
+// Create a new multi-dimensional array
+$juices["apple"]["green"] = "good"; 
+?>
+Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+
+<?php
+$arr1 = array(2, 3);
+$arr2 = $arr1;
+$arr2[] = 4; // $arr2 is changed,
+             // $arr1 is still array(2, 3)
+             
+$arr3 = &$arr1;
+$arr3[] = 4; // now $arr1 and $arr3 are the same
+?>
+
+
+----Iterables----
+
+
+Iterable is a pseudo-type introduced in PHP 7.1. It accepts any array or object implementing the Traversable interface. Both of these types are iterable using foreach and can be used with yield from within a generator.
+
+
+Using Iterables ¶
+Iterable can be used as a parameter type to indicate that a function requires a set of values, but does not care about the form of the value set since it will be used with foreach. If a value is not an array or instance of Traversable, a TypeError will be thrown.
+
+Example #1 Iterable parameter type example
+
+<?php
+
+function foo(iterable $iterable) {
+    foreach ($iterable as $value) {
+        // ...
+    } 
+}
+
+?>
+
+Parameters declared as iterable may use NULL or an array as a default value.
+
+Example #2 Iterable parameter default value example
+
+<?php
+
+function foo(iterable $iterable = []) {
+    // ...
+}
+
+?>
+
+Iterable can also be used as a return type to indicate a function will return an iterable value. If the returned value is not an array or instance of Traversable, a TypeError will be thrown.
+
+Example #3 Iterable return type example
+
+<?php
+
+function bar(): iterable {
+    return [1, 2, 3];
+}
+
+?>
+
+
+Functions declaring iterable as a return type may also be generators.
+
+Example #4 Iterable generator return type example
+
+<?php
+
+function gen(): iterable {
+    yield 1;
+    yield 2;
+    yield 3;
+}
+
+?>
+
+
+-----Iterable Type Variance-----
+Classes extending/implementing may broaden methods using array or Traversable as parameter types to iterable or narrow return types from iterable to array or Traversable.
+
+Example #5 Iterable type variance example
+
+<?php
+
+interface Example {
+    public function method(array $array): iterable;
+}
+
+class ExampleImplementation implements Example {
+    public function method(iterable $iterable): array {
+        // Parameter broadened and return type narrowed.
+    }
+}
+
+?>
+
+Just to note:
+Though objects may (or may not) be Traversable, the can use in foreach because implicit conversion to array
+<?php
+class Foo {
+    public $a = 1;
+    public $b = "Helo";
+};
+
+$bar = new Foo;
+
+foreach($bar as $elm) {
+    echo $elm . ' ';
+}
+
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+----Classes and Object----
+
+A valid class name starts with a letter or underscore, followed by any number of letters, numbers, or underscores. As a regular expression, it would be expressed thus: ^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$.
+
+A class may contain its own constants, variables (called "properties"), and functions (called "methods").
+
+Note: Calling a non-static method statically from an incompatible context has been deprecated as of PHP 5.6.0. As of PHP 7.0.0 calling a non-static method statically has been generally deprecated
+
+
+<?php 
+/**
+ * Simple class
+ */
+class ClassName 
+{
+	//property declaration
+	public $var = 'a default value';
+
+	//method declaration
+	public function displayVar(){
+		echo $this->var;
+	}
+}
+?>
+
+
+<?php
+// Static method should only be called with Class Name
+class A
+{
+    function foo()
+    {
+        if (isset($this)) {
+            echo '$this is defined (';
+            echo get_class($this);
+            echo ")\n";
+        } else {
+            echo "\$this is not defined.\n";
+        }
+    }
+}
+
+class B
+{
+    function bar()
+    {
+        A::foo();
+    }
+}
+
+$a = new A();
+$a->foo();
+
+A::foo();
+
+$b = new B();
+$b->bar();
+
+B::bar();
+?>
+
+new
+
+To create an instance of a class, the new keyword must be used. An object will always be created unless the object has a constructor defined that throws an exception on error. Classes should be defined before instantiation (and in some cases this is a requirement).
+
+If a string containing the name of a class is used with new, a new instance of that class will be created. If the class is in a namespace, its fully qualified name must be used when doing this.
+
+Note:
+
+If there are no arguments to be passed to the class's constructor, parentheses after the class name may be omitted.
+
+
+<?php 
+
+/**
+ * Simple Program with Constructor
+ */
+class A
+{
+	
+	function __construct()
+	{
+		echo "this is the constructor";
+	}
+}
+
+//$a = new A 
+
+
+//Altername way to create an object of class with String
+$a = 'A';
+$instane = new $a;
+
+ ?>
+
+
+<?php 
+//object cloning
+class A 
+{
+    public $data = "inside class";
+    
+}
+
+$obj1 = new A();
+$obj2 = clone($obj1);  //create separate object with separate data
+echo "<br>";
+print_r($obj1);
+print_r($obj2);
+
+$obj2->data = "hello";
+echo "<br>";
+print_r($obj1);
+print_r($obj2);
+?>
+
+
+<?php 
+//object copying
+class A 
+{
+    public $data = "inside class";
+    
+}
+
+$obj1 = new A();
+$obj2 = $obj1;  //create separate object with same data
+echo "<br>";
+print_r($obj1);
+print_r($obj2);
+
+$obj2->data = "hello";
+echo "<br>";
+print_r($obj1);
+print_r($obj2);
+?>
+
+
+---Static method---
+<?php 
+//static function can be called using classname only
+class A 
+{
+     public $name = "harish"; 
+    //normal function
+    function display(){
+        echo "<br> this is inside diplay";
+        echo $this->name;
+    }
+}
+
+$obj = new A();
+$obj->display();
+
+A::display(); //this is wrong call using class name
+?>
+
+
+
+
+Creating new objects
+<?php
+class Test
+{
+    static public function getNew()
+    {
+        return new static;
+    }
+}
+
+class Child extends Test
+{}
+
+$obj1 = new Test();
+$obj2 = new $obj1;
+var_dump($obj1 !== $obj2);
+
+$obj3 = Test::getNew();
+var_dump($obj3 instanceof Test);
+
+$obj4 = Child::getNew();
+var_dump($obj4 instanceof Child);
+?>
+
+
+<?php 
+//static function can be called using classname only
+class A 
+{   
+    public $name="";
+    public $age="";
+
+    //normal function
+    function display(){
+        echo "<br><br>this = >";
+        var_dump($this);
+    }
+}
+
+$obj = new A();
+echo "<br>Object of class=>";
+
+$obj->name="welcome";
+$obj->age="23";
+
+var_dump($obj);
+$obj->display();
+
+?>
+
+<?php 
+//static function can be called using classname only
+class A 
+{   
+    public $name="";
+    private $age="";
+
+    //normal function
+    function display(){
+        $this->name ="rahul";
+        $this->age="34";
+        echo "<br><br>this = >";
+        var_dump($this);
+    }
+}
+
+$obj = new A();
+echo "<br>Object of class=>";
+var_dump($obj);
+$obj->display();
+
+//after function call
+echo "<br>After function call = >";
+var_dump($obj);
+?>
+
+<?php 
+//object and this interreation
+class A 
+{   
+    public $name="";
+    public $age="";
+
+    //normal function
+    function display(){
+        echo "display";
+    }
+}
+
+//memeory allocate
+
+$akshay =  new A();
+$swati = new A();
+$akshay->name = "akshay";
+$akshay->age = "30";
+echo "<pre>";
+var_dump($akshay);
+var_dump($swati);
+
+$swati->name = "swati";
+$swati->age = "16";
+var_dump($akshay);
+var_dump($swati);
+?>
+
+<?php 
+//object and this interreation
+class A 
+{   
+    public $name="";
+    public $age="";
+
+    //normal function
+    function setDetails($a, $b){
+        $this->name = $a;
+        $this->age = $b;
+    }
+}
+
+//memeory allocate
+
+$akshay =  new A();
+$akshay->setDetails('akshay', 34);
+
+$swati = new A();
+$swati->setDetails('swati', 24);
+
+
+echo "<pre>";
+var_dump($akshay);
+var_dump($swati);
+
+?>
+
+
+Above code is using static function which can be directly access by the class name
+
+
+<?php
+
+// Calling method using class name and Object
+class Test
+{
+    static public function getNew()
+    {
+        return new static;
+    }
+}
+
+class Child extends Test
+{}
+
+//Calling function with Class name
+var_dump(Test::getNew()); 
+
+//Calling function with Object
+$obj = new Test;
+var_dump($obj->getNew());
+
+?>
+
+
+<?php
+/*
+Call method of the class while creating object
+*/
+class Test
+{
+ 	public function hi()
+    {
+    	echo "hi";
+    }
+}
+
+//Calling method while creating object
+echo (new Test)->hi();
+
+?>
+
+----Properties and Methods----
+
+Class properties and methods live in separate "namespaces", so it is possible to have a property and a method with the same name. Referring to both a property and a method has the same notation, and whether a property will be accessed or a method will be called, solely depends on the context, i.e. whether the usage is a variable access or a function call
+
+<?php
+class Foo
+{
+    public $bar = 'property';
+    
+    public function bar() {
+        return 'method';
+    }
+}
+
+//while using method use round bracket
+//old browner is not taking PHP_EOL AS new line
+$obj = new Foo();
+echo $obj->bar, PHP_EOL, $obj->bar(), PHP_EOL;
+
+
+Example #8 Calling an anonymous function stored in a property
+
+<?php
+class Foo
+{
+    public $bar;
+    
+    public function __construct() {
+    	//created an anonymous function
+    	//$this is the object name which is below replaced by $obj
+        $this->bar = function() {
+            return 42;
+        };
+    }
+}
+
+//object created
+$obj = new Foo();
+
+// as of PHP 5.3.0:
+$func = $obj->bar;
+echo $func(), PHP_EOL;
+
+// alternatively, as of PHP 7.0.0:
+echo ($obj->bar)(), PHP_EOL;
+
+
+------extends-----
+A class can inherit the methods and properties of another class by using the keyword extends in the class declaration. It is not possible to extend multiple classes; a class can only inherit from one base class.
+
+The inherited methods and properties can be overridden by redeclaring them with the same name defined in the parent class. However, if the parent class has defined a method as final, that method may not be overridden. It is possible to access the overridden methods or static properties by referencing them with parent::.
+
+
+When overriding methods, the parameter signature should remain the same or PHP will generate an E_STRICT level error. This does not apply to the constructor, which allows overriding with different parameters.
+
+<?php
+/**
+ * Inheritance
+ */
+class A 
+{
+	
+	public function displayVar()
+	{
+		echo "<br> displayvar from Base Class";
+	}
+}
+
+class B extends A
+{
+    // Redefine the parent method
+    function displayVar()
+    {
+        echo "<br> Extending class\n";
+        parent::displayVar();
+    }
+}
+
+$extended = new B();
+$extended->displayVar();
+?>
+
+
+The class keyword is also used for class name resolution. You can get a string containing the fully qualified name of the ClassName class by using ClassName::class. This is particularly useful with namespaced classes.
+
+<?php
+namespace NS {
+    class ClassName {
+    }
+    //this line will print the string formatted class name inside namespace
+    echo ClassName::class;
+}
+?>
+
+
+Note:
+
+The class name resolution using ::class is a compile time transformation. That means at the time the class name string is created no autoloading has happened yet. As a consequence, class names are expanded even if the class does not exist. No error is issued in that case.
+
+<?php
+print Some\Class\DoesNot\Exist::class;
+?>
+OP:
+Some\Class\Does\Not\Exist
+
+
+As of PHP 8.0.0, the ::class constant may also be used on objects. This resolution happens at runtime, not compile time. Its effect is the same as calling get_class() on the object.
+Example #12 Object name resolution
+<?php
+/*This code for php8 will not work in below version*/
+namespace NS {
+    class ClassName {
+    }
+}
+$c = new ClassName();
+print $c::class;
+?>
+
+
+Nullsafe methods and properties 
+As of PHP 8.0.0, properties and methods may also be accessed with the "nullsafe" operator instead: ?->. The nullsafe operator works the same as property or method access as above, except that if the object being dereferenced is NULL then NULL will be returned rather than an exception thrown. If the dereference is part of a chain, the rest of the chain is skipped.
+
+The effect is similar to wrapping each access in an is_null() check first, but more compact.
+
+Example #13 Nullsafe Operator
+<?php
+
+// As of PHP 8.0.0, this line:
+$result = $repository?->getUser(5)?->name;
+
+// Is equivalent to the following code block:
+if (is_null($repository)) {
+    $result = null;
+} else {
+    $user = $repository->getUser(5);
+    if (is_null($user)) {
+        $result = null;
+    } else {
+        $result = $user->name;
+    }
+}
+?>
+
+----Very important---
+
+What is the difference between  $this  and  self ?
+
+Inside a class definition, $this refers to the current object, while  self  refers to the current class.
+
+It is necessary to refer to a class element using  self ,
+and refer to an object element using  $this .
+Note also how an object variable must be preceded by a keyword in its definition.
+
+The following example illustrates a few cases:
+
+<?php
+class Classy {
+
+const       STAT = 'S' ; // no dollar sign for constants (they are always static)
+static     $stat = 'Static' ;
+public     $publ = 'Public' ;
+private    $priv = 'Private' ;
+protected  $prot = 'Protected' ;
+
+function __construct( ){  }
+
+public function showMe( ){
+    print '<br> self::STAT: '  .  self::STAT ; // refer to a (static) constant like this
+    print '<br> self::$stat: ' . self::$stat ; // static variable
+    print '<br>$this->stat: '  . $this->stat ; // legal, but not what you might think: empty result
+    print '<br>$this->publ: '  . $this->publ ; // refer to an object variable like this
+    print '<br>' ;
+}
+}
+$me = new Classy( ) ;
+$me->showMe( ) ;
+
+/* Produces this output:
+self::STAT: S
+self::$stat: Static
+$this->stat:
+$this->publ: Public
+*/
+?>
+
+
+===Properties=====
+Class member variables are called properties. 
+
+They are defined by using one of the keywords public, protected, or private, optionally followed by a type declaration, followed by a normal variable declaration. This declaration may include an initialization, but this initialization must be a constant value--that is, it must be able to be evaluated at compile time and must not depend on run-time information in order to be evaluated.
+
+Within class methods non-static properties may be accessed by using -> (Object Operator): $this->property (where property is the name of the property). Static properties are accessed by using the :: (Double Colon): self::$property. 
+
+The pseudo-variable $this is available inside any class method when that method is called from within an object context. $this is a reference to the calling object (usually the object to which the method belongs, but possibly another object, if the method is called statically from the context of a secondary object).
+
+
+Example #1 property declarations
+<?php
+class SimpleClass
+{
+   // valid as of PHP 5.6.0:
+   public $var1 = 'hello ' . 'world';
+   // valid as of PHP 5.3.0:
+   public $var2 = <<<EOD
+hello world
+EOD;
+   // valid as of PHP 5.6.0:
+   public $var3 = 1+2;
+   // invalid property declarations:
+   public $var4 = self::myStaticMethod();
+   public $var5 = $myVar;
+
+   // valid property declarations:
+   public $var6 = myConstant;
+   public $var7 = array(true, false);
+
+   // valid as of PHP 5.3.0:
+   public $var8 = <<<'EOD'
+hello world
+EOD;
+}
+?>
+
+
+Note: Classes and object function Important to use
+https://www.php.net/manual/en/ref.classobj.php
+
+===Heredoc and Nowdoc ===
+Heredoc
+
+A third way to delimit strings is the heredoc syntax: <<<. After this operator, an identifier is provided, then a newline. The string itself follows, and then the same identifier again to close the quotation.
+
+The closing identifier must begin in the first column of the line. Also, the identifier must follow the same naming rules as any other label in PHP: it must contain only alphanumeric characters and underscores, and must start with a non-digit character or underscore.
+
+
+<?php
+/*Invalid example*/
+class foo {
+    public $bar = <<<EOT
+bar
+    EOT; //error in this line
+}
+// Identifier must not be indented
+?>
+
+
+<?php
+/*Valid Example*/
+class foo {
+    public $bar = <<<EOT
+bar
+EOT;
+}
+?>
+
+Heredoc text behaves just like a double-quoted string, without the double quotes. This means that quotes in a heredoc do not need to be escaped, but the escape codes listed above can still be used. Variables are expanded, but the same care must be taken when expressing complex variables inside a heredoc as with strings.
+
+
+Example #3 Heredoc string quoting example
+
+<?php
+$str = <<<EOD
+Example of string
+spanning multiple lines
+using heredoc syntax.
+EOD;
+
+/* More complex example, with variables. */
+class foo
+{
+    var $foo;
+    var $bar;
+
+    function __construct()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
+}
+
+$foo = new foo();
+$name = 'MyName';
+
+echo <<<EOT
+My name is "$name". I am printing some $foo->foo.
+Now, I am printing some {$foo->bar[1]}.
+This should print a capital 'A': \x41
+EOT;
+?>
+
+
+<?php
+// Static variables
+function foo()
+{
+    static $bar = <<<LABEL
+Nothing in here...
+LABEL;
+}
+
+// Class properties/constants
+class foo
+{
+    const BAR = <<<FOOBAR
+Constant example
+FOOBAR;
+
+    public $baz = <<<FOOBAR
+Property example
+FOOBAR;
+}
+?>
+
+Example #6 Using double quotes in Heredoc
+
+<?php
+echo <<<"FOOBAR"
+Hello World!
+FOOBAR;
+?>
+
+===Nowdoc===
+Nowdocs are to single-quoted strings what heredocs are to double-quoted strings. A nowdoc is specified similarly to a heredoc, but no parsing is done inside a nowdoc. The construct is ideal for embedding PHP code or other large blocks of text without the need for escaping. It shares some features in common with the SGML <![CDATA[ ]]> construct, in that it declares a block of text which is not for parsing.
+
+A nowdoc is identified with the same <<< sequence used for heredocs, but the identifier which follows is enclosed in single quotes, e.g. <<<'EOT'. All the rules for heredoc identifiers also apply to nowdoc identifiers, especially those regarding the appearance of the closing identifier.
+
+<?php
+echo <<<'EOD'
+Example of string spanning multiple lines
+using nowdoc syntax. Backslashes are always treated literally,
+e.g. \\ and \'.
+EOD;
+?>
+
+
+Example #8 Nowdoc string quoting example with variables
+
+<?php
+class foo
+{
+    public $foo;
+    public $bar;
+
+    function __construct()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
+}
+
+$foo = new foo();
+$name = 'MyName';
+
+echo <<<'EOT'
+My name is "$name". I am printing some $foo->foo.
+Now, I am printing some {$foo->bar[1]}.
+This should not print a capital 'A': \x41
+EOT;
+?>
+
+Example #9 Static data example
+
+<?php
+class foo {
+    public $bar = <<<'EOT'
+bar
+EOT;
+}
+?>
+
+---Class and Object Type Declaration---
+As of PHP 7.4.0, property definitions can include a type declaration.
+
+Example #3 Example of typed properties
+
+<?php
+
+class User
+{
+    public $id; //use int in 7.4 above version
+    public $name;
+
+    public function __construct(int $id, ?string $name)
+    {
+        $this->id = $id;
+        $this->name = $name;
+    }
+}
+
+$user = new User(1234, null);
+
+var_dump($user->id);
+var_dump($user->name);
+
+?>
+
+Note: All error in php
+https://www.php.net/manual/en/class.error.php
+
+
+Example #4 Accessing properties
+
+<?php
+/*Version after 7.4 for declaration of data type*/
+class Shape 
+{
+    public int $numberOfSides;
+    public string $name;
+
+    public function setNumberOfSides(int $numberOfSides): void
+    {
+        $this->numberOfSides = $numberOfSides;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getNumberOfSides(): int
+    {
+        return $this->numberOfSides;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}
+
+$triangle = new Shape();
+$triangle->setName("triangle");
+$triangle->setNumberofSides(3);
+var_dump($triangle->getName());
+var_dump($triangle->getNumberOfSides());
+
+$circle = new Shape();
+$circle->setName("circle");
+var_dump($circle->getName());
+var_dump($circle->getNumberOfSides());
+?>
+
+
+--Class constants----
+It is possible to define constant values on a per-class basis remaining the same and unchangeable. Constants differ from normal variables in that you don't use the $ symbol to declare or use them. The default visibility of class constants is public.
+
+The value must be a constant expression, not (for example) a variable, a property, or a function call.
+
+Note that class constants are allocated once per class, and not for each class instance.
+
+Example #1 Defining and using a constant
+
+Example #1 Defining and using a constant
+
+<?php
+class MyClass
+{
+    const CONSTANT = 'constant value';
+
+    function showConstant() {
+    	//self refer to the class
+        echo  self::CONSTANT . "\n";
+    }
+}
+
+echo MyClass::CONSTANT . "\n";
+
+$classname = "MyClass";
+echo $classname::CONSTANT . "\n"; // As of PHP 5.3.0
+
+$class = new MyClass();
+$class->showConstant();
+
+echo $class::CONSTANT."\n"; // As of PHP 5.3.0
+?>
+
+//static data example
+<?php
+class foo {
+    // As of PHP 5.3.0
+    const BAR = <<<'EOT'
+bar
+EOT;
+    // As of PHP 5.3.0
+    const BAZ = <<<EOT
+baz
+EOT;
+}
+?>
+
+Example #3 Namespaced ::class example
+
+<?php
+namespace foo {
+    class bar {
+    }
+
+    echo bar::class; // foo\bar
+}
+?>
+
+Example #4 Constant expression example
+
+<?php
+const ONE = 1;
+
+class foo {
+    // As of PHP 5.6.0
+    const TWO = ONE * 2;
+    const THREE = ONE + self::TWO;
+    const SENTENCE = 'The value of THREE is '.self::THREE;
+}
+?>
+
+
+Example #5 Class constant visibility modifiers
+
+<?php
+class Foo {
+    // As of PHP 7.1.0
+    public const BAR = 'bar';
+    private const BAZ = 'baz';
+}
+echo Foo::BAR, PHP_EOL;
+echo Foo::BAZ, PHP_EOL;
+?>
+
+Note:
+As of PHP 7.1.0 visibility modifiers are allowed for class constants.
+
+
+---AutoLoading Classes---
+Autoloading Classes ¶
+Many developers writing object-oriented applications create one PHP source file per class definition. One of the biggest annoyances is having to write a long list of needed includes at the beginning of each script (one for each class).
+
+In PHP 5, this is no longer necessary. The spl_autoload_register() function registers any number of autoloaders, enabling for classes and interfaces to be automatically loaded if they are currently not defined. By registering autoloaders, PHP is given a last chance to load the class or interface before it fails with an error.
+
+Tip
+Although the __autoload() function can also be used for autoloading classes and interfaces, it's preferred to use the spl_autoload_register() function. This is because it is a more flexible alternative (enabling for any number of autoloaders to be specified in the application, such as in third party libraries). For this reason, using __autoload() is discouraged and deprecated as of PHP 7.2.0.
+
+
+Example #1 Autoload example
+
+This example attempts to load the classes MyClass1 and MyClass2 from the files MyClass1.php and MyClass2.php respectively.
+
+
+<?php
+
+//It will try to load a file with MyClass1.php
+spl_autoload_register(function ($class_name) {
+    include $class_name . '.php'; 
+    //MyClass1.php and MyClass2.php
+});
+
+$obj  = new MyClass1();
+$obj2 = new MyClass2(); 
+?>
+
+
+
+
+
+Example #2 Autoload other example
+
+This example attempts to load the interface ITest.
+
+<?php
+
+spl_autoload_register(function ($name) {
+    var_dump($name);
+});
+
+class Foo implements ITest {
+}
+
+/*
+string(5) "ITest"
+
+Fatal error: Interface 'ITest' not found in ...
+*/
+?>
+
+
+Example #3 Autoloading with exception handling for 5.3.0+
+
+This example throws an exception and demonstrates the try/catch block.
+
+
+
+<?php
+spl_autoload_register(function ($name) {
+    echo "Want to load $name.\n";
+    throw new Exception("Unable to load $name.");
+});
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+
+//OP Error : Want to load NonLoadableClass. Unable to load NonLoadableClass.
+?>
+
+Example #4 Autoloading with exception handling for 5.3.0+ - Missing custom exception
+
+This example throws an exception for a non-loadable, custom exception.
+
+<?php
+spl_autoload_register(function ($name) {
+    echo "Want to load $name.\n";
+    throw new MissingException("Unable to load $name.");
+});
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+
+Learn Below:
+unserialize()
+unserialize_callback_func
+spl_autoload_register()
+spl_autoload()
+__autoload()
+add a note add a note
+
+
+
+
+-----Constructors and Destructors-----
+Constructor 
+__construct ( mixed ...$values = "" ) : void
+PHP allows developers to declare constructor methods for classes. Classes which have a constructor method call this method on each newly-created object, so it is suitable for any initialization that the object may need before it is used.
+
+
+Note: Parent constructors are not called implicitly if the child class defines a constructor. In order to run a parent constructor, a call to parent::__construct() within the child constructor is required. If the child does not define a constructor then it may be inherited from the parent class just like a normal class method (if it was not declared as private).
+
+<?php
+class BaseClass {
+    function __construct() {
+        print "In BaseClass constructor<br>";
+    }
+}
+
+class SubClass extends BaseClass {
+    function __construct() {
+    	//calling parent class constructor
+        parent::__construct();
+        print "In SubClass constructor<br>";
+    }
+}
+
+class OtherSubClass extends BaseClass {
+    // inherits BaseClass's constructor
+    //baseclass constructor will be automatically called
+}
+
+// In BaseClass constructor
+$obj = new BaseClass();
+
+// In BaseClass constructor
+// In SubClass constructor
+$obj = new SubClass();
+
+// In BaseClass constructor
+$obj = new OtherSubClass();
+?>
+
+Constructors are ordinary methods which are called during the instantiation of their corresponding object. As such, they may define an arbitrary number of arguments, which may be required, may have a type, and may have a default value. Constructor arguments are called by placing the arguments in parentheses after the class name.
+
+Example #2 Using constructor arguments
+
+<?php/*
+version 7.8
+*/
+class Point {
+    protected int $x;
+    protected int $y;
+
+    public function __construct(int $x, int $y = 0) {
+        $this->x = $x;
+        $this->y = $y;
+    }
+}
+
+// Pass both parameters.
+$p1 = new Point(4, 5);
+// Pass only the required parameter. $y will take its default value of 0.
+$p2 = new Point(4);
+// With named parameters (as of PHP 8.0):
+$p3 = new Point(y: 5, x: 4);
+?>
+
+
+<?php
+class Point {
+    protected  $x;
+    protected  $y;
+
+    public function __construct( $x,  $y = 0) {
+        $this->x = $x;
+        $this->y = $y;
+        echo "<br> $this->x $this->y";
+    }
+}
+
+// Pass both parameters.
+$p1 = new Point(4, 5);
+// Pass only the required parameter. $y will take its default value of 0.
+$p2 = new Point(4);
+// With named parameters (as of PHP 8.0):
+$p3 = new Point(5,4);
+?>
+
+Destructor
+__destruct ( ) : void
+PHP 5 introduces a destructor concept similar to that of other object-oriented languages, such as C++. The destructor method will be called as soon as there are no other references to a particular object, or in any order during the shutdown sequence.
+
+Example #5 Destructor Example
+
+<?php
+
+class MyDestructableClass 
+{
+    function __construct() {
+        print "In constructor\n";
+    }
+
+    function __destruct() {
+        print "Destroying " . __CLASS__ . "\n";
+    }
+}
+
+$obj = new MyDestructableClass();
+?>
+
+
+Like constructors, parent destructors will not be called implicitly by the engine. In order to run a parent destructor, one would have to explicitly call parent::__destruct() in the destructor body. Also like constructors, a child class may inherit the parent's destructor if it does not implement one itself.
+
+The destructor will be called even if script execution is stopped using exit(). Calling exit() in a destructor will prevent the remaining shutdown routines from executing.
+
+Note:
+
+Destructors called during the script shutdown have HTTP headers already sent. The working directory in the script shutdown phase can be different with some SAPIs (e.g. Apache).
+
+Note:
+
+Attempting to throw an exception from a destructor (called in the time of script termination) causes a fatal error.
+
+Note: 
+Destructor should always be public
+
+---Visibility---
+The visibility of a property, a method or (as of PHP 7.1.0) a constant can be defined by prefixing the declaration with the keywords public, protected or private. Class members declared public can be accessed everywhere. Members declared protected can be accessed only within the class itself and by inheriting and parent classes. Members declared as private may only be accessed by the class that defines the member.
+
+
+----Property Visibility----
+Class properties must be defined as public, private, or protected. If declared using var, the property will be defined as public.
+
+Example #1 Property declaration
+
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    public $public = 'Public';
+    protected $protected = 'Protected';
+    private $private = 'Private';
+
+    function printHello()
+    {
+        echo $this->public;
+        echo $this->protected;
+        echo $this->private;
+    }
+}
+
+$obj = new MyClass();
+echo $obj->public; // Works
+echo $obj->protected; // Fatal Error
+echo $obj->private; // Fatal Error
+$obj->printHello(); // Shows Public, Protected and Private
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // We can redeclare the public and protected properties, but not private
+    public $public = 'Public2';
+    protected $protected = 'Protected2';
+
+    function printHello()
+    {
+        echo $this->public;
+        echo $this->protected;
+        echo $this->private;
+    }
+}
+
+$obj2 = new MyClass2();
+echo $obj2->public; // Works
+echo $obj2->protected; // Fatal Error
+echo $obj2->private; // Undefined
+$obj2->printHello(); // Shows Public2, Protected2, Undefined
+
+?>
+
+Method Visibility
+
+Class methods may be defined as public, private, or protected. Methods declared without any explicit visibility keyword are defined as public.
+
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    // Declare a public constructor
+    public function __construct() { }
+
+    // Declare a public method
+    public function MyPublic() { }
+
+    // Declare a protected method
+    protected function MyProtected() { }
+
+    // Declare a private method
+    private function MyPrivate() { }
+
+    // This is public
+    function Foo()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate();
+    }
+}
+
+$myclass = new MyClass;
+$myclass->MyPublic(); // Works
+$myclass->MyProtected(); // Fatal Error
+$myclass->MyPrivate(); // Fatal Error
+$myclass->Foo(); // Public, Protected and Private work
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // This is public
+    function Foo2()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate(); // Fatal Error
+    }
+}
+
+$myclass2 = new MyClass2;
+$myclass2->MyPublic(); // Works
+$myclass2->Foo2(); // Public and Protected work, not Private
+
+class Bar 
+{
+    public function test() {
+        $this->testPrivate(); //this will call bar private method
+        $this->testPublic();
+    }
+
+    public function testPublic() {
+        echo "Bar::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Bar::testPrivate\n";
+    }
+}
+
+class Foo extends Bar 
+{
+	//this will overwrite the previous method of bar
+    public function testPublic() {
+        echo "Foo::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Foo::testPrivate\n";
+    }
+}
+
+$myFoo = new Foo();
+$myFoo->test(); // Bar::testPrivate 
+                // Foo::testPublic
+?>
+
+Constant Visibility 
+As of PHP 7.1.0, class constants may be defined as public, private, or protected. Constants declared without any explicit visibility keyword are defined as public.
+
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    // Declare a public constant
+    public const MY_PUBLIC = 'public';
+
+    // Declare a protected constant
+    protected const MY_PROTECTED = 'protected';
+
+    // Declare a private constant
+    private const MY_PRIVATE = 'private';
+
+    public function foo()
+    {
+        echo self::MY_PUBLIC;
+        echo self::MY_PROTECTED;
+        echo self::MY_PRIVATE;
+    }
+}
+
+$myclass = new MyClass();
+MyClass::MY_PUBLIC; // Works
+MyClass::MY_PROTECTED; // Fatal Error
+MyClass::MY_PRIVATE; // Fatal Error
+$myclass->foo(); // Public, Protected and Private work
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // This is public
+    function foo2()
+    {
+        echo self::MY_PUBLIC;
+        echo self::MY_PROTECTED;
+        echo self::MY_PRIVATE; // Fatal Error
+    }
+}
+
+$myclass2 = new MyClass2;
+echo MyClass2::MY_PUBLIC; // Works
+$myclass2->foo2(); // Public and Protected work, not Private
+?>
+
+
+--Visibility from other objects--
+Objects of the same type will have access to each others private and protected members even though they are not the same instances. This is because the implementation specific details are already known when inside those objects.
+
+Example #4 Accessing private members of the same object type
+<?php
+class Test
+{
+    public $foo;
+
+    public function __construct($foo)
+    {
+        $this->foo = $foo;
+    }
+
+    private function bar()
+    {
+        echo 'Accessed the private method.';
+    }
+
+    public function baz(Test $otherObject)
+    {
+        // We can change the private property:
+        echo "<pre>";
+        // var_dump($otherObject);
+        echo $otherObject->foo; //will output other
+
+        echo "<br>";
+        $otherObject->foo = 'hello'; //change other to hello
+        var_dump($otherObject->foo);
+
+        // We can also call the private method:
+        $otherObject->bar();
+    }
+}
+
+$test = new Test('test');
+echo $test->foo;
+//constructor will ba called first after that baz method will be executed
+$test->baz(new Test('other'));
+?>
+
+
+
+
+
+---Object Inheritance--
+Inheritance is a well-established programming principle, and PHP makes use of this principle in its object model. This principle will affect the way many classes and objects relate to one another.
+
+For example, when you extend a class, the subclass inherits all of the public and protected methods from the parent class. Unless a class overrides those methods, they will retain their original functionality.
+
+This is useful for defining and abstracting functionality, and permits the implementation of additional functionality in similar objects without the need to reimplement all of the shared functionality.
+
+Note:
+
+Unless autoloading is used, then classes must be defined before they are used. If a class extends another, then the parent class must be declared before the child class structure. This rule applies to classes that inherit other classes and interfaces.
+
+
+Example #1 Inheritance Example
+
+<?php
+
+class Foo
+{
+    public function printItem($string)
+    {
+        echo 'Foo: ' . $string . PHP_EOL;
+    }
+    
+    public function printPHP()
+    {
+        echo 'PHP is great.' . PHP_EOL;
+    }
+}
+
+class Bar extends Foo
+{
+    public function printItem($string)
+    {
+        echo 'Bar: ' . $string . PHP_EOL;
+    }
+}
+
+$foo = new Foo();
+$bar = new Bar();
+$foo->printItem('baz'); // Output: 'Foo: baz'
+$foo->printPHP();       // Output: 'PHP is great' 
+
+$bar->printItem('baz'); // Output: 'Bar: baz'
+$bar->printPHP();       // Output: 'PHP is great'
+
+?>
+
+Scope Resolution Operator (::)
+The Scope Resolution Operator (also called Paamayim Nekudotayim) or in simpler terms, the double colon, is a token that allows access to static, constant, and overridden properties or methods of a class.
+
+When referencing these items from outside the class definition, use the name of the class.
+
+As of PHP 5.3.0, it's possible to reference the class using a variable. The variable's value can not be a keyword (e.g. self, parent and static).
+
+Paamayim Nekudotayim would, at first, seem like a strange choice for naming a double-colon. However, while writing the Zend Engine 0.5 (which powers PHP 3), that's what the Zend team decided to call it. It actually does mean double-colon - in Hebrew!
+
+Example #1 :: from outside the class definition
+
+<?php
+class MyClass {
+    const CONST_VALUE = 'A constant value';
+}
+
+$classname = 'MyClass';
+echo $classname::CONST_VALUE; // As of PHP 5.3.0
+
+echo MyClass::CONST_VALUE;
+?>
+
+Three special keywords self, parent and static are used to access properties or methods from inside the class definition.
+Example #2 :: from inside the class definition
+
+<?php
+class OtherClass extends MyClass
+{
+    public static $my_static = 'static var';
+
+    public static function doubleColon() {
+        echo parent::CONST_VALUE . "\n";
+        echo self::$my_static . "\n";
+    }
+}
+
+$classname = 'OtherClass';
+$classname::doubleColon(); // As of PHP 5.3.0
+//method is static
+OtherClass::doubleColon();
+?>
+
+When an extending class overrides the parents definition of a method, PHP will not call the parent's method. It's up to the extended class on whether or not the parent's method is called. This also applies to Constructors and Destructors, Overloading, and Magic method definitions.
+
+Example #3 Calling a parent's method
+
+<?php
+class MyClass
+{
+    protected function myFunc() {
+        echo "MyClass::myFunc()\n";
+    }
+}
+
+class OtherClass extends MyClass
+{
+    // Override parent's definition
+    public function myFunc()
+    {
+        // But still call the parent function
+        parent::myFunc();
+        echo "OtherClass::myFunc()\n";
+    }
+}
+
+$class = new OtherClass();
+$class->myFunc();
+?>
+
+
+Static Keyword
+Tip
+This page describes the use of the static keyword to define static methods and properties. static can also be used to define static variables and for late static bindings. Please refer to those pages for information on those meanings of static.
+
+Declaring class properties or methods as static makes them accessible without needing an instantiation of the class. A property declared as static cannot be accessed with an instantiated class object (though a static method can).
+
+For compatibility with PHP 4, if no visibility declaration is used, then the property or method will be treated as if it was declared as public.
+
+Static methods ¶
+Because static methods are callable without an instance of the object created, the pseudo-variable $this is not available inside the method declared as static.
+
+
+Example #1 Static method example
+
+<?php
+class Foo {
+    public static function aStaticMethod() {
+        // ...
+    }
+}
+
+Foo::aStaticMethod();
+$classname = 'Foo';
+$classname::aStaticMethod(); // As of PHP 5.3.0
+?>
+
+
+Example #2 Static property example
+
+<?php
+class Foo
+{
+    public static $my_static = 'foo';
+
+    public function staticValue() {
+        return self::$my_static;
+    }
+}
+
+class Bar extends Foo
+{
+    public function fooStatic() {
+        return parent::$my_static;
+    }
+}
+
+
+print Foo::$my_static . "\n";
+
+$foo = new Foo();
+print $foo->staticValue() . "\n";
+print $foo->my_static . "\n";      // Undefined "Property" my_static 
+
+print $foo::$my_static . "\n";
+$classname = 'Foo';
+print $classname::$my_static . "\n"; // As of PHP 5.3.0
+
+print Bar::$my_static . "\n";
+$bar = new Bar();
+print $bar->fooStatic() . "\n";
+?>
+
+
+--Class Abstraction--
+
+PHP 5 introduces abstract classes and methods. Classes defined as abstract cannot be instantiated, and any class that contains at least one abstract method must also be abstract. Methods defined as abstract simply declare the method's signature - they cannot define the implementation.
+
+When inheriting from an abstract class, all methods marked abstract in the parent's class declaration must be defined by the child; additionally, these methods must be defined with the same (or a less restricted) visibility. For example, if the abstract method is defined as protected, the function implementation must be defined as either protected or public, but not private. Furthermore the signatures of the methods must match, i.e. the type hints and the number of required arguments must be the same. For example, if the child class defines an optional argument, where the abstract method's signature does not, there is no conflict in the signature. This also applies to constructors as of PHP 5.4. Before 5.4 constructor signatures could differ.
+
+<?php 
+
+abstract class Human{
+    abstract public function giveName($abc);
+}
+
+class child extends Human{
+    public $name = "";
+
+    public function giveName($abc){
+        $this->name = $abc;
+        echo $this->name;
+    }
+}
+$obj = new child();
+$obj->giveName('alok');
+?>
+
+
+
+<?php 
+//Abstract Class
+abstract class Base
+{
+    //forcing derive Class to create method getOut()
+    abstract public function getOut();
+
+    public function printOut(){
+        print $this->getOut();
+    }
+}
+
+class Derive extends Base
+{
+    
+    public function getOut(){
+        echo "This msg is from Base class";
+    }
+}
+//below line will give error becoz we cannot create Object of Base Class
+//$obj1 = new Base();
+
+$obj = new Derive();
+$obj->printOut();
+
+ ?>
+
+Example #1 Abstract class example
+
+<?php
+abstract class AbstractClass
+{
+    // Force Extending class to define this method
+    abstract protected function getValue();
+    abstract protected function prefixValue($prefix);
+
+    // Common method
+    public function printOut() {
+        print $this->getValue() . "\n";
+    }
+}
+
+class ConcreteClass1 extends AbstractClass
+{
+    protected function getValue() {
+        return "ConcreteClass1";
+    }
+
+    public function prefixValue($prefix) {
+        return "{$prefix}ConcreteClass1";
+    }
+}
+
+class ConcreteClass2 extends AbstractClass
+{
+    public function getValue() {
+        return "ConcreteClass2";
+    }
+
+    public function prefixValue($prefix) {
+        return "{$prefix}ConcreteClass2";
+    }
+}
+
+$class1 = new ConcreteClass1;
+$class1->printOut();
+echo $class1->prefixValue('FOO_') ."\n";
+
+$class2 = new ConcreteClass2;
+$class2->printOut();
+echo $class2->prefixValue('FOO_') ."\n";
+?>
+
+
+
+Example #2 Abstract class example
+
+<?php
+abstract class AbstractClass
+{
+    // Our abstract method only needs to define the required arguments
+    abstract protected function prefixName($name);
+
+}
+
+class ConcreteClass extends AbstractClass
+{
+
+    // Our child class may define optional arguments not in the parent's signature
+    public function prefixName($name, $separator = ".") {
+        if ($name == "Pacman") {
+            $prefix = "Mr";
+        } elseif ($name == "Pacwoman") {
+            $prefix = "Mrs";
+        } else {
+            $prefix = "";
+        }
+        return "{$prefix}{$separator} {$name}";
+    }
+}
+
+$class = new ConcreteClass;
+echo $class->prefixName("Pacman"), "\n";
+echo $class->prefixName("Pacwoman"), "\n";
+?>
+
+
+---Object Interfaces----
+Object interfaces allow you to create code which "specifies which methods a class must implement", without having to define how these methods are implemented.
+
+Interfaces are defined in the same way as a class, but with the interface keyword replacing the class keyword and without any of the methods having their contents defined.
+
+Note: 
+All methods declared in an interface must be public; this is the nature of an interface.
+
+Note that it is possible to declare a constructor in an interface, which can be useful in some contexts, e.g. for use by factories.
+
+Note: implements
+To implement an interface, the implements operator is used. All methods in the interface must be implemented within a class; failure to do so will result in a fatal error. Classes may implement more than one interface if desired by separating each interface with a comma.
+
+
+Note: Constants
+It's possible for interfaces to have constants. Interface constants work exactly like class constants except they cannot be overridden by a class/interface that inherits them.
+
+<?php 
+/*
+Interface Class
+We use interface when all the methods are abstract. 
+And we want them to be defin in Derive Class
+*/
+interface item
+{
+    //method should be public in interface
+    //by default method is abstract in Interface
+      public function getOut();
+}
+class Derive implements item
+{  
+    public function getOut(){
+        echo "This msg is from Base class";
+    }
+}
+$obj = new Derive();
+$obj->getOut();
+ ?>
+
+
+Example #1 Interface example
+
+<?php
+
+// Declare the interface 'iTemplate'
+interface iTemplate
+{
+    public function setVariable($name, $var);
+    public function getHtml($template);
+}
+
+// Implement the interface
+// This will work
+class Template implements iTemplate
+{
+    private $vars = array();
+  
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
+    }
+  
+    public function getHtml($template)
+    {
+        foreach($this->vars as $name => $value) {
+            $template = str_replace('{' . $name . '}', $value, $template);
+        }
+ 
+        return $template;
+    }
+}
+
+// This will not work
+// Fatal error: Class BadTemplate contains 1 abstract methods
+// and must therefore be declared abstract (iTemplate::getHtml)
+class BadTemplate implements iTemplate
+{
+    private $vars = array();
+  
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
+    }
+}
+?>
+Example #2 Extendable Interfaces
+
+<?php
+interface a
+{
+    public function foo();
+}
+
+interface b extends a
+{
+    public function baz(Baz $baz);
+}
+
+// This will work
+class c implements b
+{
+    public function foo()
+    {
+    }
+
+    public function baz(Baz $baz)
+    {
+    }
+}
+
+// This will not work and result in a fatal error
+class d implements b
+{
+    public function foo()
+    {
+    }
+
+    public function baz(Foo $foo)
+    {
+    }
+}
+?>
+Example #3 Multiple interface inheritance
+
+<?php
+interface a
+{
+    public function foo();
+}
+
+interface b
+{
+    public function bar();
+}
+
+interface c extends a, b
+{
+    public function baz();
+}
+
+class d implements c
+{
+    public function foo()
+    {
+    }
+
+    public function bar()
+    {
+    }
+
+    public function baz()
+    {
+    }
+}
+?>
+Example #4 Interfaces with constants
+
+<?php
+interface a
+{
+    const b = 'Interface constant';
+}
+
+// Prints: Interface constant
+echo a::b;
+
+
+// This will however not work because it's not allowed to 
+// override constants.
+class b implements a
+{
+    const b = 'Class constant';
+}
+?>
+
+
+---Traits--- 
+As of PHP 5.4.0, PHP implements a method of code reuse called Traits.
+
+Traits are a mechanism for code reuse in single inheritance languages such as PHP. A Trait is intended to reduce some limitations of single inheritance by enabling a developer to reuse sets of methods freely in several independent classes living in different class hierarchies. The semantics of the combination of Traits and classes is defined in a way which reduces complexity, and avoids the typical problems associated with multiple inheritance and Mixins.
+
+A Trait is similar to a class, but only intended to group functionality in a fine-grained and consistent way. It is not possible to instantiate a Trait on its own. It is an addition to traditional inheritance and enables horizontal composition of behavior; that is, the application of class members without requiring inheritance.
+
+
+
+Note: PHP doesnot support multiple inheritance:
+means
+Below code is invalid
+class extends A, B
+
+
+<?php 
+/*We cannot extent two class but we can use two trait*/
+//trait2
+trait A{
+    public function hi(){
+        echo "hi user!";
+    }
+}
+//trait2
+trait B{
+ 
+ public function bye(){
+    echo "bye User!";
+ }
+}
+
+class C{
+    //here we are using two trait at a time
+    use A,B;
+
+    public function greet(){
+        $this->hi();
+        $this->bye();
+    }
+}
+$obj = new C();
+$obj->greet();
+
+ ?>
+
+Example: Both are having same method
+
+<?php 
+//trait2
+trait humans{
+    public static function greet(){
+        echo "Good Morning ";
+    }
+}
+
+class dog{
+    //here we are using two trait at a time
+    use humans;
+
+    public function greet(){
+        humans::greet(); //calling the method of humans
+        //otherwise dog greet will get executed
+        echo "Bow Bow";
+    }
+}
+$m = new dog();
+$m->greet();
+
+ ?>
+
+
+
+Example #1 Trait example
+
+<?php
+trait ezcReflectionReturnInfo {
+    function getReturnType() { /*1*/ }
+    function getReturnDescription() { /*2*/ }
+}
+
+class ezcReflectionMethod extends ReflectionMethod {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}
+
+class ezcReflectionFunction extends ReflectionFunction {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}
+?>
+Precedence ¶
+An inherited member from a base class is overridden by a member inserted by a Trait. The precedence order is that members from the current class override Trait methods, which in turn override inherited methods.
+
+Example #2 Precedence Order Example
+
+An inherited method from a base class is overridden by the method inserted into MyHelloWorld from the SayWorld Trait. The behavior is the same for methods defined in the MyHelloWorld class. The precedence order is that methods from the current class override Trait methods, which in turn override methods from the base class.
+
+<?php
+class Base {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait SayWorld {
+    public function sayHello() {
+        parent::sayHello();
+        echo 'World!';
+    }
+}
+
+class MyHelloWorld extends Base {
+    use SayWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+?>
+The above example will output:
+
+Hello World!
+Example #3 Alternate Precedence Order Example
+
+<?php
+trait HelloWorld {
+    public function sayHello() {
+        echo 'Hello World!';
+    }
+}
+
+class TheWorldIsNotEnough {
+    use HelloWorld;
+    public function sayHello() {
+        echo 'Hello Universe!';
+    }
+}
+
+$o = new TheWorldIsNotEnough();
+$o->sayHello();
+?>
+The above example will output:
+
+Hello Universe!
+Multiple Traits ¶
+Multiple Traits can be inserted into a class by listing them in the use statement, separated by commas.
+
+Example #4 Multiple Traits Usage
+
+<?php
+trait Hello {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait World {
+    public function sayWorld() {
+        echo 'World';
+    }
+}
+
+class MyHelloWorld {
+    use Hello, World;
+    public function sayExclamationMark() {
+        echo '!';
+    }
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+$o->sayExclamationMark();
+?>
+The above example will output:
+
+Hello World!
+Conflict Resolution ¶
+If two Traits insert a method with the same name, a fatal error is produced, if the conflict is not explicitly resolved.
+
+To resolve naming conflicts between Traits used in the same class, the insteadof operator needs to be used to choose exactly one of the conflicting methods.
+
+Since this only allows one to exclude methods, the as operator can be used to add an alias to one of the methods. Note the as operator does not rename the method and it does not affect any other method either.
+
+Example #5 Conflict Resolution
+
+In this example, Talker uses the traits A and B. Since A and B have conflicting methods, it defines to use the variant of smallTalk from trait B, and the variant of bigTalk from trait A.
+
+The Aliased_Talker makes use of the as operator to be able to use B's bigTalk implementation under an additional alias talk.
+
+<?php
+trait A {
+    public function smallTalk() {
+        echo 'a';
+    }
+    public function bigTalk() {
+        echo 'A';
+    }
+}
+
+trait B {
+    public function smallTalk() {
+        echo 'b';
+    }
+    public function bigTalk() {
+        echo 'B';
+    }
+}
+
+class Talker {
+    use A, B {
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+    }
+}
+
+class Aliased_Talker {
+    use A, B {
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+        B::bigTalk as talk;
+    }
+}
+?>
+Note:
+
+Prior to PHP 7.0, defining a property in a class with the same name as in a trait would throw an E_STRICT if the class definition was compatible (same visibility and initial value).
+
+Changing Method Visibility ¶
+Using the as syntax, one can also adjust the visibility of the method in the exhibiting class.
+
+Example #6 Changing Method Visibility
+
+<?php
+trait HelloWorld {
+    public function sayHello() {
+        echo 'Hello World!';
+    }
+}
+
+// Change visibility of sayHello
+class MyClass1 {
+    use HelloWorld { sayHello as protected; }
+}
+
+// Alias method with changed visibility
+// sayHello visibility not changed
+class MyClass2 {
+    use HelloWorld { sayHello as private myPrivateHello; }
+}
+?>
+
+
+
+Traits Composed from Traits ¶
+Just as classes can make use of traits, so can other traits. By using one or more traits in a trait definition, it can be composed partially or entirely of the members defined in those other traits.
+
+Example #7 Traits Composed from Traits
+
+<?php
+trait Hello {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait World {
+    public function sayWorld() {
+        echo 'World!';
+    }
+}
+
+trait HelloWorld {
+    use Hello, World;
+}
+
+class MyHelloWorld {
+    use HelloWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+?>
+The above example will output:
+
+Hello World!
+Abstract Trait Members ¶
+Traits support the use of abstract methods in order to impose requirements upon the exhibiting class.
+
+--Caution---
+A concrete class fulfills this requirement by defining a concrete method with the same name; its signature may be different.
+
+Example #8 Express Requirements by Abstract Methods
+
+<?php
+trait Hello {
+    public function sayHelloWorld() {
+        echo 'Hello'.$this->getWorld();
+    }
+    abstract public function getWorld();
+}
+
+class MyHelloWorld {
+    private $world;
+    use Hello;
+    public function getWorld() {
+        return $this->world;
+    }
+    public function setWorld($val) {
+        $this->world = $val;
+    }
+}
+?>
+
+
+----Static Trait Members--
+Traits can define both static members and static methods.
+
+Example #9 Static Variables
+
+<?php
+trait Counter {
+    public function inc() {
+        static $c = 0;
+        $c = $c + 1;
+        echo "$c\n";
+    }
+}
+
+class C1 {
+    use Counter;
+}
+
+class C2 {
+    use Counter;
+}
+
+$o = new C1(); $o->inc(); // echo 1
+$p = new C2(); $p->inc(); // echo 1
+?>
+Example #10 Static Methods
+
+<?php
+trait StaticExample {
+    public static function doSomething() {
+        return 'Doing something';
+    }
+}
+
+class Example {
+    use StaticExample;
+}
+
+Example::doSomething();
+?>
+
+
+---Properties---
+Traits can also define properties.
+
+Example #11 Defining Properties
+
+<?php
+trait PropertiesTrait {
+    public $x = 1;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+}
+
+$example = new PropertiesExample;
+$example->x;
+?>
+
+If a trait defines a property then a class can not define a property with the same name unless it is compatible (same visibility and initial value), otherwise a fatal error is issued. Before PHP 7.0.0, defining a property in the class with the same visibility and initial value as in the trait, raised an E_STRICT notice.
+
+Example #12 Conflict Resolution
+
+<?php
+trait PropertiesTrait {
+    public $same = true;
+    public $different = false;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+    public $same = true; // Allowed as of PHP 7.0.0; E_STRICT notice formerly
+    public $different = true; // Fatal error
+}
+?>
+
+
+---Anonymous classes---
+Support for anonymous classes was added in PHP 7. Anonymous classes are useful when simple, one-off objects need to be created.
+
+<?php
+
+class SomeClass {}
+interface SomeInterface {}
+trait SomeTrait {}
+
+var_dump(new class(10) extends SomeClass implements SomeInterface {
+    private $num;
+
+    public function __construct($num)
+    {
+        $this->num = $num;
+    }
+
+    use SomeTrait;
+});
+?>
+
+
+<?php
+
+class SomeClass {}
+interface SomeInterface {}
+trait SomeTrait {}
+
+$anonymous = new class(10) extends SomeClass implements SomeInterface {
+    public $num;
+
+    public function __construct($num)
+    {
+        $this->num = $num;
+    }
+
+    use SomeTrait;
+};
+
+
+//object of Anonymous class
+var_dump($anonymous);
+
+?>
+
+Nesting an anonymous class within another class does not give it access to any private or protected methods or properties of that outer class. In order to use the outer class' protected properties or methods, the anonymous class can extend the outer class. To use the private properties of the outer class in the anonymous class, they must be passed through its constructor:
+
+<?php
+
+class Outer
+{
+    private $prop = 1;
+    protected $prop2 = 2;
+
+    protected function func1()
+    {
+        return 3;
+    }
+
+    public function func2()
+    {
+        return new class($this->prop) extends Outer {
+            private $prop3;
+
+            public function __construct($prop)
+            {
+                //fetch from prop 1 from private class
+                echo "Prop : ".$prop;
+                $this->prop3 = $prop;
+            }
+
+            public function func3()
+            {
+                return $this->prop2 + $this->prop3 + $this->func1();
+            }
+        };
+    }
+}
+
+echo (new Outer)->func2()->func3();
+?>
+
+All objects created by the same anonymous class declaration are instances of that very class.
+
+<?php
+function anonymous_class()
+{
+    return new class {};
+}
+
+if (get_class(anonymous_class()) === get_class(anonymous_class())) {
+    echo 'same class';
+} else {
+    echo 'different class';
+}
+?>
+
+
+Note:
+
+Note that anonymous classes are assigned a name by the engine, as demonstrated in the following example. This name has to be regarded an implementation detail, which should not be relied upon.
+
+<?php
+echo get_class(new class {});
+?>
+
+
+
+Below three examples describe anonymous class with very simple and basic but quite understandable example
+
+<?php
+// First way - anonymous class assigned directly to variable
+$ano_class_obj = new class{
+    public $prop1 = 'hello';
+    public $prop2 = 754;
+    const SETT = 'some config';
+
+    public function getValue()
+    {
+        // do some operation
+        return 'some returned value';
+    }
+
+    public function getValueWithArgu($str)
+    {
+        // do some operation
+        return 'returned value is '.$str;
+    }
+};
+
+echo "\n";
+
+var_dump($ano_class_obj);
+echo "\n";
+
+echo $ano_class_obj->prop1;
+echo "\n";
+
+echo $ano_class_obj->prop2;
+echo "\n";
+
+echo $ano_class_obj::SETT;
+echo "\n";
+
+echo $ano_class_obj->getValue();
+echo "\n";
+
+echo $ano_class_obj->getValueWithArgu('OOP');
+echo "\n";
+
+echo "\n";
+
+// Second way - anonymous class assigned to variable via defined function
+$ano_class_obj_with_func = ano_func();
+
+function ano_func()
+{
+    return new class {
+        public $prop1 = 'hello';
+        public $prop2 = 754;
+        const SETT = 'some config';
+
+        public function getValue()
+        {
+            // do some operation
+            return 'some returned value';
+        }
+
+        public function getValueWithArgu($str)
+        {
+            // do some operation
+            return 'returned value is '.$str;
+        }
+    };
+}
+
+echo "\n";
+
+var_dump($ano_class_obj_with_func);
+echo "\n";
+
+echo $ano_class_obj_with_func->prop1;
+echo "\n";
+
+echo $ano_class_obj_with_func->prop2;
+echo "\n";
+
+echo $ano_class_obj_with_func::SETT;
+echo "\n";
+
+echo $ano_class_obj_with_func->getValue();
+echo "\n";
+
+echo $ano_class_obj_with_func->getValueWithArgu('OOP');
+echo "\n";
+
+echo "\n";
+
+// Third way - passing argument to anonymous class via constructors
+$arg = 1; // we got it by some operation
+$config = [2, false]; // we got it by some operation
+$ano_class_obj_with_arg = ano_func_with_arg($arg, $config);
+
+function ano_func_with_arg($arg, $config)
+{
+    return new class($arg, $config) {
+        public $prop1 = 'hello';
+        public $prop2 = 754;
+        public $prop3, $config;
+        const SETT = 'some config';
+
+        public function __construct($arg, $config)
+        {
+            $this->prop3 = $arg;
+            $this->config =$config;
+        }
+
+        public function getValue()
+        {
+            // do some operation
+            return 'some returned value';
+        }
+
+        public function getValueWithArgu($str)
+        {
+            // do some operation
+            return 'returned value is '.$str;
+        }
+    };
+}
+
+echo "\n";
+
+var_dump($ano_class_obj_with_arg);
+echo "\n";
+
+echo $ano_class_obj_with_arg->prop1;
+echo "\n";
+
+echo $ano_class_obj_with_arg->prop2;
+echo "\n";
+
+echo $ano_class_obj_with_arg::SETT;
+echo "\n";
+
+echo $ano_class_obj_with_arg->getValue();
+echo "\n";
+
+echo $ano_class_obj_with_arg->getValueWithArgu('OOP');
+echo "\n";
+
+echo "\n";
+?>
+
+
+----Exceptions----
+PHP has an exception model similar to that of other programming languages. An exception can be thrown, and caught ("catched") within PHP. Code may be surrounded in a try block, to facilitate the catching of potential exceptions. Each try must have at least one corresponding catch or finally block.
+
+<?php 
+$a =2;
+$b =0;
+$c =0;
+
+try{
+    if($b == 0){
+        throw new Exception("b cannot be zero");
+    }
+    $c = $a/$b;
+    echo $c;
+
+}
+catch(Exception $e){
+     // echo $e;
+    echo "B cannot be zero";
+}
+finally(){
+    echo "Always get executed";
+}
+ ?>
+
+
+//function returns exception message
+<?php 
+
+function add($x, $y){
+    
+    try{
+        if($x == 0 AND $y==0){
+            throw new Exception("x and y cannot be zero");
+        }
+    }
+    catch(Exception $e){
+        return "x and y cannot be zero";
+    }
+}
+
+$a=0;
+$b=0;
+echo add($a, $b);
+
+ ?>
+
+
+ <?php 
+//Exception nest
+class A
+{
+    function abc()
+    {
+        try{
+            try{
+                throw new Exception('<br>Error');
+            }
+            catch(Exception $a){
+                // throw new Exception($a);
+                throw $a;
+            }
+        }
+        catch(Exception $e){
+            echo $e->getMessage();
+        }
+        
+    }
+}
+
+
+$obj = new A();
+$obj->abc();
+
+ ?>
+
+Example #8 Multi catch exception handling
+
+<?php
+
+class MyException extends Exception { }
+
+class MyOtherException extends Exception { }
+
+class Test {
+    public function testing() {
+        try {
+            throw new MyException();
+        } catch (MyException | MyOtherException $e) {
+            var_dump(get_class($e));
+        }
+    }
+}
+
+$foo = new Test;
+$foo->testing();
+
+?>
+
+===Generator===
+
+Generators provide an easy way to implement simple iterators without the overhead or complexity of implementing a class that implements the Iterator interface.
+
+A generator allows you to write code that uses foreach to iterate over a set of data without needing to build an array in memory, which may cause you to exceed a memory limit, or require a considerable amount of processing time to generate. Instead, you can write a generator function, which is the same as a normal function, except that instead of returning once, a generator can yield as many times as it needs to in order to provide the values to be iterated over.
+
+
+A simple example of this is to reimplement the range() function as a generator. The standard range() function has to generate an array with every value in it and return it, which can result in large arrays: for example, calling range(0, 1000000) will result in well over 100 MB of memory being used.
+
+As an alternative, we can implement an xrange() generator, which will only ever need enough memory to create an Iterator object and track the current state of the generator internally, which turns out to be less than 1 kilobyte.
+
+Example #1 Implementing range() as a generator
+
+<?php
+function xrange($start, $limit, $step = 1) {
+    if ($start <= $limit) {
+        if ($step <= 0) {
+            throw new LogicException('Step must be positive');
+        }
+
+        for ($i = $start; $i <= $limit; $i += $step) {
+            yield $i;
+        }
+    } else {
+        if ($step >= 0) {
+            throw new LogicException('Step must be negative');
+        }
+
+        for ($i = $start; $i >= $limit; $i += $step) {
+            yield $i;
+        }
+    }
+}
+
+/*
+ * Note that both range() and xrange() result in the same
+ * output below.
+ */
+
+echo 'Single digit odd numbers from range():  ';
+foreach (range(1, 9, 2) as $number) {
+    echo "$number ";
+}
+echo "\n";
+
+echo 'Single digit odd numbers from xrange(): ';
+foreach (xrange(1, 9, 2) as $number) {
+    echo "$number ";
+}
+?>
+
+
+
+
+====Generator syntax ====
+A generator function looks just like a normal function, except that instead of returning a value, a generator yields as many values as it needs to. Any function containing yield is a generator function.
+
+
+===yield keyword===
+The heart of a generator function is the yield keyword. In its simplest form, a yield statement looks much like a return statement, except that instead of stopping execution of the function and returning, yield instead provides a value to the code looping over the generator and pauses execution of the generator function.
+
+Example #1 A simple example of yielding values
+
+<?php
+function gen_one_to_three() {
+    for ($i = 1; $i <= 3; $i++) {
+        // Note that $i is preserved between yields.
+        yield $i;
+    }
+}
+
+$generator = gen_one_to_three();
+foreach ($generator as $value) {
+    echo "$value\n";
+}
+?>
+
+
+Note:
+
+Internally, sequential integer keys will be paired with the yielded values, just as with a non-associative array.
+
+
+Yielding values with keys ¶
+PHP also supports associative arrays, and generators are no different. In addition to yielding simple values, as shown above, you can also yield a key at the same time.
+
+The syntax for yielding a key/value pair is very similar to that used to define an associative array, as shown below.
+
+Example #2 Yielding a key/value pair
+
+<?php
+/*
+ * The input is semi-colon separated fields, with the first
+ * field being an ID to use as a key.
+ */
+
+$input = <<<'EOF'
+1;PHP;Likes dollar signs
+2;Python;Likes whitespace
+3;Ruby;Likes blocks
+EOF;
+
+function input_parser($input) {
+    foreach (explode("\n", $input) as $line) {
+        $fields = explode(';', $line);
+        $id = array_shift($fields);
+
+        yield $id => $fields;
+    }
+}
+
+foreach (input_parser($input) as $id => $fields) {
+    echo "$id:\n";
+    echo "    $fields[0]\n";
+    echo "    $fields[1]\n";
+}
+?>
+
+Caution
+As with the simple value yields shown earlier, yielding a key/value pair in an expression context requires the yield statement to be parenthesised:
+
+$data = (yield $key => $value);
+
+====Yielding null values===
+Yield can be called without an argument to yield a null value with an automatic key.
+
+Example #3 Yielding nulls
+
+<?php
+function gen_three_nulls() {
+    foreach (range(1, 3) as $i) {
+        yield;
+    }
+}
+
+var_dump(iterator_to_array(gen_three_nulls()));
+?>
+
+=====Yielding by reference=====
+Generator functions are able to yield values by reference as well as by value. This is done in the same way as returning references from functions: by prepending an ampersand to the function name.
+
+Example #4 Yielding values by reference
+
+<?php
+function &gen_reference() {
+    $value = 3;
+
+    while ($value > 0) {
+        yield $value;
+    }
+}
+
+/*
+ * Note that we can change $number within the loop, and
+ * because the generator is yielding references, $value
+ * within gen_reference() changes.
+ */
+foreach (gen_reference() as &$number) {
+    echo (--$number).'... ';
+}
+?>
+
+
+===Comparing generators with Iterator objects===
+The primary advantage of generators is their simplicity. Much less boilerplate code has to be written compared to implementing an Iterator class, and the code is generally much more readable. For example, the following function and class are equivalent:
+
+<?php
+function getLinesFromFile($fileName) {
+    if (!$fileHandle = fopen($fileName, 'r')) {
+        return;
+    }
+ 
+    while (false !== $line = fgets($fileHandle)) {
+        yield $line;
+    }
+ 
+    fclose($fileHandle);
+}
+
+// versus...
+
+class LineIterator implements Iterator {
+    protected $fileHandle;
+ 
+    protected $line;
+    protected $i;
+ 
+    public function __construct($fileName) {
+        if (!$this->fileHandle = fopen($fileName, 'r')) {
+            throw new RuntimeException('Couldn\'t open file "' . $fileName . '"');
+        }
+    }
+ 
+    public function rewind() {
+        fseek($this->fileHandle, 0);
+        $this->line = fgets($this->fileHandle);
+        $this->i = 0;
+    }
+ 
+    public function valid() {
+        return false !== $this->line;
+    }
+ 
+    public function current() {
+        return $this->line;
+    }
+ 
+    public function key() {
+        return $this->i;
+    }
+ 
+    public function next() {
+        if (false !== $this->line) {
+            $this->line = fgets($this->fileHandle);
+            $this->i++;
+        }
+    }
+ 
+    public function __destruct() {
+        fclose($this->fileHandle);
+    }
+}
+?>
+This flexibility does come at a cost, however: generators are forward-only iterators, and cannot be rewound once iteration has started. This also means that the same generator can't be iterated over multiple times: the generator will need to be rebuilt by calling the generator function again.
+
+====PREDEFINED VARIABLES=====
+PHP provides a large number of predefined variables to all scripts. The variables represent everything from external variables to built-in environment variables, last error messages to last retrieved headers.
+
+Superglobals — Superglobals are built-in variables that are always available in all scopes
+$GLOBALS —    References all variables available in global scope
+$_SERVER —    Server and execution environment information
+$_GET —       HTTP GET variables
+$_POST —      HTTP POST variables
+$_FILES —     HTTP File Upload variables
+$_REQUEST —   HTTP Request variables
+$_SESSION —   Session variables
+$_ENV —       Environment variables
+$_COOKIE —    HTTP Cookies
+$php_errormsg — The previous error message
+$http_response_header — HTTP response headers
+$argc —     The number of arguments passed to script
+$argv —     Array of arguments passed to script
+
+
+
+
+
+-----Superglobals----
+Superglobals — Superglobals are built-in variables that are always available in all scopes
+
+Several predefined variables in PHP are "superglobals", which means they are available in all scopes throughout a script. There is no need to do global $variable; to access them within functions or methods.
+
+$GLOBALS
+$_SERVER
+$_GET
+$_POST
+$_FILES
+$_COOKIE
+$_SESSION
+$_REQUEST
+$_ENV
+
+1. $GLOBALS
+Description
+An associative array containing references to all variables which are currently defined in the global scope of the script. The variable names are the keys of the array.
+
+
+Example #1 $GLOBALS example
+
+<?php
+function test() {
+    $foo = "local variable";
+
+    echo '$foo in global scope: ' . $GLOBALS["foo"] . "\n";
+    echo '$foo in current scope: ' . $foo . "\n";
+}
+
+$foo = "Example content";
+test();
+?>
+
+
+$_SERVER
+(PHP 4 >= 4.1.0, PHP 5, PHP 7, PHP 8)
+
+$_SERVER — Server and execution environment information
+
+----Description---
+$_SERVER is an array containing information such as headers, paths, and script locations. The entries in this array are created by the web server. There is no guarantee that every web server will provide any of these; servers may omit some, or provide others not listed here.
+
+---Indices---
+
+'PHP_SELF'
+The filename of the currently executing script, relative to the document root. For instance, $_SERVER['PHP_SELF'] in a script at the address http://example.com/foo/bar.php would be /foo/bar.php. The __FILE__ constant contains the full path and filename of the current (i.e. included) file. If PHP is running as a command-line processor this variable contains the script name.
+
+
+'argv'
+
+Array of arguments passed to the script. When the script is run on the command line, this gives C-style access to the command line parameters. When called via the GET method, this will contain the query string.
+
+
+'argc'
+
+Contains the number of command line parameters passed to the script (if run on the command line).
+
+
+'GATEWAY_INTERFACE'
+What revision of the CGI specification the server is using; e.g. 'CGI/1.1'.
+
+
+'SERVER_ADDR'
+The IP address of the server under which the current script is executing.
+
+'SERVER_NAME'
+The name of the server host under which the current script is executing. If the script is running on a virtual host, this will be the value defined for that virtual host.
+
+'SERVER_SOFTWARE'
+Server identification string, given in the headers when responding to requests.
+
+'SERVER_PROTOCOL'
+Name and revision of the information protocol via which the page was requested; e.g. 'HTTP/1.0';
+
+'REQUEST_METHOD'
+Which request method was used to access the page; e.g. 'GET', 'HEAD', 'POST', 'PUT'.
+
+'REQUEST_TIME'
+The timestamp of the start of the request.
+
+
+'REQUEST_TIME_FLOAT'
+The timestamp of the start of the request, with microsecond precision.
+
+'QUERY_STRING'
+The query string, if any, via which the page was accessed.
+
+
+'DOCUMENT_ROOT'
+The document root directory under which the current script is executing, as defined in the server's configuration file.
+
+'HTTP_ACCEPT'
+Contents of the Accept: header from the current request, if there is one.
+
+'HTTP_ACCEPT_CHARSET'
+Contents of the Accept-Charset: header from the current request, if there is one. Example: 'iso-8859-1,*,utf-8'.
+
+'HTTP_ACCEPT_ENCODING'
+Contents of the Accept-Encoding: header from the current request, if there is one. Example: 'gzip'.
+
+'HTTP_ACCEPT_LANGUAGE'
+Contents of the Accept-Language: header from the current request, if there is one. Example: 'en'.
+
+'HTTP_CONNECTION'
+Contents of the Connection: header from the current request, if there is one. Example: 'Keep-Alive'.
+
+'HTTP_HOST'
+Contents of the Host: header from the current request, if there is one.
+
+
+'HTTP_REFERER'
+The address of the page (if any) which referred the user agent to the current page. This is set by the user agent. Not all user agents will set this, and some provide the ability to modify HTTP_REFERER as a feature. In short, it cannot really be trusted.
+
+
+'HTTP_USER_AGENT'
+Contents of the User-Agent: header from the current request, if there is one. This is a string denoting the user agent being which is accessing the page. A typical example is: Mozilla/4.5 [en] (X11; U; Linux 2.2.9 i586). Among other things, you can use this value with get_browser() to tailor your page's output to the capabilities of the user agent.
+
+'HTTPS'
+Set to a non-empty value if the script was queried through the HTTPS protocol.
+
+'REMOTE_ADDR'
+The IP address from which the user is viewing the current page.
+
+
+'REMOTE_HOST'
+The Host name from which the user is viewing the current page. The reverse dns lookup is based on the REMOTE_ADDR of the user.
+
+Note: Your web server must be configured to create this variable. For example in Apache you'll need HostnameLookups On inside httpd.conf for it to exist. See also gethostbyaddr().
+
+
+'REMOTE_PORT'
+The port being used on the user's machine to communicate with the web server.
+
+'REMOTE_USER'
+The authenticated user.
+
+'REDIRECT_REMOTE_USER'
+The authenticated user if the request is internally redirected.
+
+'SCRIPT_FILENAME'
+The absolute pathname of the currently executing script.
+
+
+Note:
+If a script is executed with the CLI, as a relative path, such as file.php or ../file.php, $_SERVER['SCRIPT_FILENAME'] will contain the relative path specified by the user.
+
+'SERVER_ADMIN'
+The value given to the SERVER_ADMIN (for Apache) directive in the web server configuration file. If the script is running on a virtual host, this will be the value defined for that virtual host.
+
+
+'SERVER_PORT'
+The port on the server machine being used by the web server for communication. For default setups, this will be '80'; using SSL, for instance, will change this to whatever your defined secure HTTP port is.
+
+
+Note: Under the Apache 2, you must set UseCanonicalName = On, as well as UseCanonicalPhysicalPort = On in order to get the physical (real) port, otherwise, this value can be spoofed and it may or may not return the physical port value. It is not safe to rely on this value in security-dependent contexts.
+
+
+'SERVER_SIGNATURE'
+String containing the server version and virtual host name which are added to server-generated pages, if enabled.
+
+
+'PATH_TRANSLATED'
+Filesystem- (not document root-) based path to the current script, after the server has done any virtual-to-real mapping.
+
+Note: Apache 2 users may use AcceptPathInfo = On inside httpd.conf to define PATH_INFO.
+
+'SCRIPT_NAME'
+Contains the current script's path. This is useful for pages which need to point to themselves. The __FILE__ constant contains the full path and filename of the current (i.e. included) file.
+
+
+'REQUEST_URI'
+The URI which was given in order to access this page; for instance, '/index.html'.
+
+
+'PHP_AUTH_DIGEST'
+When doing Digest HTTP authentication this variable is set to the 'Authorization' header sent by the client (which you should then use to make the appropriate validation).
+
+
+'PHP_AUTH_USER'
+When doing HTTP authentication this variable is set to the username provided by the user.
+
+
+'PHP_AUTH_PW'
+When doing HTTP authentication this variable is set to the password provided by the user.
+
+
+'AUTH_TYPE'
+When doing HTTP authentication this variable is set to the authentication type.
+
+
+'PATH_INFO'
+Contains any client-provided pathname information trailing the actual script filename but preceding the query string, if available. For instance, if the current script was accessed via the URL http://www.example.com/php/path_info.php/some/stuff?foo=bar, then $_SERVER['PATH_INFO'] would contain /some/stuff.
+
+
+'ORIG_PATH_INFO'
+Original version of 'PATH_INFO' before processed by PHP.
+
+
+<?php
+$indicesServer = array('PHP_SELF',
+'argv',
+'argc',
+'GATEWAY_INTERFACE',
+'SERVER_ADDR',
+'SERVER_NAME',
+'SERVER_SOFTWARE',
+'SERVER_PROTOCOL',
+'REQUEST_METHOD',
+'REQUEST_TIME',
+'REQUEST_TIME_FLOAT',
+'QUERY_STRING',
+'DOCUMENT_ROOT',
+'HTTP_ACCEPT',
+'HTTP_ACCEPT_CHARSET',
+'HTTP_ACCEPT_ENCODING',
+'HTTP_ACCEPT_LANGUAGE',
+'HTTP_CONNECTION',
+'HTTP_HOST',
+'HTTP_REFERER',
+'HTTP_USER_AGENT',
+'HTTPS',
+'REMOTE_ADDR',
+'REMOTE_HOST',
+'REMOTE_PORT',
+'REMOTE_USER',
+'REDIRECT_REMOTE_USER',
+'SCRIPT_FILENAME',
+'SERVER_ADMIN',
+'SERVER_PORT',
+'SERVER_SIGNATURE',
+'PATH_TRANSLATED',
+'SCRIPT_NAME',
+'REQUEST_URI',
+'PHP_AUTH_DIGEST',
+'PHP_AUTH_USER',
+'PHP_AUTH_PW',
+'AUTH_TYPE',
+'PATH_INFO',
+'ORIG_PATH_INFO') ;
+
+echo '<table cellpadding="10">' ;
+foreach ($indicesServer as $arg) {
+    if (isset($_SERVER[$arg])) {
+        echo '<tr><td>'.$arg.'</td><td>' . $_SERVER[$arg] . '</td></tr>' ;
+    }
+    else {
+        echo '<tr><td>'.$arg.'</td><td>-</td></tr>' ;
+    }
+}
+echo '</table>' ;
+?>
+
+--Another method to view all server details--
+<?php
+
+foreach ($_SERVER as $parm => $value)  echo "<br>$parm = '$value'\n";
+
+?>
+
+
+---$_GET---
+$_GET — HTTP GET variables
+
+---Description---
+An associative array of variables passed to the current script via the URL parameters (aka. query string). Note that the array is not only populated for GET requests, but rather for all requests with a query string.
+
+
+<?php
+echo 'Hello ' . htmlspecialchars($_GET["name"]) . '!';
+?>
+
+---POST---
+---Description---
+An associative array of variables passed to the current script via the HTTP POST method when using application/x-www-form-urlencoded or multipart/form-data as the HTTP Content-Type in the request.
+
+<?php
+echo 'Hello ' . htmlspecialchars($_POST["name"]) . '!';
+?>
+
+
+
+
+
+
+
+
